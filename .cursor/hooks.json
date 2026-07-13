@@ -1,6 +1,12 @@
 {
   "version": 1,
   "hooks": {
+    "sessionStart": [
+      {
+        "command": ".cursor/hooks/ensure-grafana-running.sh",
+        "timeout": 20
+      }
+    ],
     "beforeShellExecution": [
       {
         "command": ".cursor/hooks/enforce-fieldsphere-gh.sh",

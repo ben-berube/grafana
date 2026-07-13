@@ -20,6 +20,8 @@ Both processes should run simultaneously in separate terminal sessions. The back
 
 ## Notes
 
-- Do not run these commands unless explicitly requested by the user
+- For demos / just opening Grafana, use `.cursor/hooks/ensure-grafana-running.sh` (or the start-dev-server skill fast path) instead — it reuses the prebuilt binary and avoids multi-minute Air rebuilds
+- Do not run these hot-reload commands unless explicitly requested by the user
 - Both commands run indefinitely until stopped (Ctrl+C)
 - Ensure dependencies are installed (`make deps`) before starting
+- On macOS, run `ulimit -n 10240` before `yarn start:liveReload` to avoid EMFILE watcher failures
