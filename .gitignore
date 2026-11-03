@@ -76,6 +76,8 @@ public/css/*.min.css
 .cursor/
 !.cursor/
 .cursor/*
+!.cursor/environment.json
+!.cursor/install-cloud.sh
 !.cursor/skills/
 !.cursor/skills/**
 !.cursor/hooks.json
