@@ -91,14 +91,6 @@ var (
 			Expression:  "false",
 		},
 		{
-			Name:        "lokiQuerySplitting",
-			Description: "Split large interval queries into subqueries with smaller time intervals",
-			Stage:       FeatureStageGeneralAvailability,
-			Generate:    Generate{LegacyFrontend: true},
-			Owner:       grafanaObservabilityLogsSquad,
-			Expression:  "true", // turned on by default
-		},
-		{
 			Name:            "live.runAPIServer",
 			Description:     "Registers a live apiserver",
 			Stage:           FeatureStageExperimental,
@@ -288,14 +280,6 @@ var (
 			Owner:           grafanaAppPlatformSquad,
 			Expression:      "false",
 			Generate:        Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
-			Name:        "awsAsyncQueryCaching",
-			Description: "Enable caching for async queries for Redshift and Athena. Requires that the data source has caching and async query support enabled",
-			Stage:       FeatureStageGeneralAvailability,
-			Expression:  "true", // enabled by default
-			Owner:       grafanaDataSourcesPlugins,
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
 		},
 		{
 			Name:            "configurableSchedulerTick",
@@ -627,23 +611,6 @@ var (
 			Owner:       grafanaAlertingSquad,
 			Expression:  "false",
 			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
-			Name:            "annotationPermissionUpdate",
-			Description:     "Change the way annotation permissions work by scoping them to folders and dashboards.",
-			Stage:           FeatureStageGeneralAvailability,
-			RequiresDevMode: false,
-			Expression:      "true", // enabled by default
-			Owner:           identityAccessTeam,
-			Generate:        Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
-			Name:        "annotationsClustering",
-			Description: "Enables annotation clustering and switches to refactored annotation code",
-			Stage:       FeatureStageGeneralAvailability,
-			Generate:    Generate{LegacyFrontend: true},
-			Owner:       grafanaDatavizSquad,
-			Expression:  "true",
 		},
 		{
 			Name:        "dashboardNewLayouts",
@@ -1259,23 +1226,6 @@ var (
 			HideFromDocs:    true,
 			Expression:      "false",
 		},
-		{
-			Name:        "cloudWatchRoundUpEndTime",
-			Description: "Round up end time for metric queries to the next minute to avoid missing data",
-			Stage:       FeatureStageGeneralAvailability,
-			Owner:       grafanaDataSourcesPlugins,
-			Expression:  "true",
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
-			Name:        "prometheusAzureOverrideAudience",
-			Description: "Deprecated. Allow override default AAD audience for Azure Prometheus endpoint. Enabled by default. This feature should no longer be used and will be removed in the future.",
-			Stage:       FeatureStageDeprecated,
-			Owner:       grafanaDataSourcesPlugins,
-			Expression:  "true", // Enabled by default for now
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-
 		{
 			Name:         "vizActionsAuth",
 			Description:  "Allows authenticated API calls in actions",
@@ -2180,36 +2130,12 @@ var (
 			Expression:  "false",
 		},
 		{
-			Name:        "panelStyleActions",
-			Description: "Enable style actions (copy/paste) in the panel editor",
-			Stage:       FeatureStageGeneralAvailability,
-			Generate:    Generate{LegacyFrontend: true},
-			Owner:       grafanaDatavizSquad,
-			Expression:  "true",
-		},
-		{
-			Name:        "vizPresets",
-			Description: "Enable visualization presets",
-			Stage:       FeatureStageGeneralAvailability,
-			Generate:    Generate{LegacyFrontend: true},
-			Owner:       grafanaDatavizSquad,
-			Expression:  "true",
-		},
-		{
 			Name:        "nestedFramesFieldOverrides",
 			Description: "Enable field overrides for FieldType.nestedFrames fields (like in nested tables)",
 			Stage:       FeatureStagePublicPreview,
 			Generate:    Generate{LegacyFrontend: true},
 			Owner:       grafanaDatavizSquad,
 			Expression:  "false",
-		},
-		{
-			Name:        "vizLegendFacetedFilter",
-			Description: "Enable faceted labels filter for series visibility in the legend",
-			Stage:       FeatureStageGeneralAvailability,
-			Generate:    Generate{LegacyFrontend: true},
-			Owner:       grafanaDatavizSquad,
-			Expression:  "true",
 		},
 		{
 			Name:        "heatmapNegativeLogBuckets",
@@ -2680,15 +2606,6 @@ var (
 			HideFromDocs: true,
 			Expression:   "false",
 			Generate:     Generate{LegacyFrontend: true, React: true}, // legacy frontend for old naming convention
-		},
-		{
-			Name:         "grafana.scenesFlickeringFix",
-			Description:  "Prevents flickering in dashboards",
-			Stage:        FeatureStageGeneralAvailability,
-			Owner:        grafanaDashboardsSquad,
-			HideFromDocs: true,
-			Expression:   "true",
-			Generate:     Generate{React: true},
 		},
 		{
 			Name:         "grafana.viewPanelPane",

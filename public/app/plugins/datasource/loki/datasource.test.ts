@@ -1,4 +1,4 @@
-import { of } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import {
@@ -203,6 +203,8 @@ describe('LokiDatasource', () => {
 
   beforeEach(() => {
     origBackendSrv = getBackendSrv();
+    const actual = jest.requireActual<typeof import('./querySplitting')>('./querySplitting');
+    jest.mocked(runSplitQuery).mockImplementation(actual.runSplitQuery);
   });
 
   afterEach(() => {
@@ -215,7 +217,8 @@ describe('LokiDatasource', () => {
       queryMaxLines: number | undefined,
       dsMaxLines: string | undefined,
       expectedMaxLines: number,
-      app: CoreApp | undefined
+      app: CoreApp | undefined,
+      waitForCompletion = false
     ) => {
       const settings = {
         jsonData: {
@@ -238,10 +241,23 @@ describe('LokiDatasource', () => {
       const fetchMock = jest.fn().mockReturnValue(of({ data: testLogsResponse }));
       setBackendSrv({ ...origBackendSrv, fetch: fetchMock });
 
-      await expect(ds.query(options).pipe(take(1))).toEmitValuesWith(() => {
-        expect(fetchMock.mock.calls.length).toBe(1);
+      const assertQuery = () => {
+        // A log query with maxLines 0 is not sent. Splitting treats that as "no lines requested".
+        if (expectedMaxLines === 0) {
+          expect(fetchMock).not.toHaveBeenCalled();
+        } else {
+          expect(fetchMock).toHaveBeenCalledTimes(1);
+        }
         expect(spy.mock.calls[0][0].maxLines).toBe(expectedMaxLines);
-      });
+      };
+
+      if (waitForCompletion) {
+        await lastValueFrom(ds.query(options));
+        assertQuery();
+        return;
+      }
+
+      await expect(ds.query(options).pipe(take(1))).toEmitValuesWith(assertQuery);
     };
 
     it('should use datasource max lines when no query max lines', async () => {
@@ -261,7 +277,7 @@ describe('LokiDatasource', () => {
     });
 
     it('should report query interaction', async () => {
-      await runTest(80, '40', 80, CoreApp.Explore);
+      await runTest(80, '40', 80, CoreApp.Explore, true);
       expect(reportInteraction).toHaveBeenCalledWith(
         'grafana_explore_loki_query_executed',
         expect.objectContaining({
@@ -1825,16 +1841,12 @@ describe('LokiDatasource', () => {
   });
 
   describe('Query splitting', () => {
-    beforeAll(() => {
-      config.featureToggles.lokiQuerySplitting = true;
+    beforeEach(() => {
       jest.mocked(runSplitQuery).mockReturnValue(
         of({
           data: [],
         })
       );
-    });
-    afterAll(() => {
-      config.featureToggles.lokiQuerySplitting = false;
     });
     it.each([
       [[{ expr: 'count_over_time({a="b"}[1m])', refId: 'A' }]],

@@ -10,7 +10,6 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/handlertest"
 	"github.com/grafana/grafana/pkg/services/caching"
 	"github.com/grafana/grafana/pkg/services/contexthandler"
-	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,7 +21,7 @@ func TestCachingMiddleware(t *testing.T) {
 		require.NoError(t, err)
 
 		cs := caching.NewFakeOSSCachingService()
-		cachingServiceClient := caching.ProvideCachingServiceClient(cs, nil)
+		cachingServiceClient := caching.ProvideCachingServiceClient(cs)
 		cdt := handlertest.NewHandlerMiddlewareTest(t,
 			WithReqContext(req, &user.SignedInUser{}),
 			handlertest.WithMiddlewares(NewCachingMiddleware(cachingServiceClient)),
@@ -75,7 +74,7 @@ func TestCachingMiddleware(t *testing.T) {
 			assert.False(t, updateCacheCalled)
 		})
 
-		t.Run("If cache returns a miss, queries are issued and the update cache function is called", func(t *testing.T) {
+		t.Run("If cache returns a miss and the query should be cached, the update cache function is called", func(t *testing.T) {
 			origShouldCacheQuery := caching.ShouldCacheQuery
 			var shouldCacheQueryCalled bool
 			caching.ShouldCacheQuery = func(resp *backend.QueryDataResponse) bool {
@@ -95,82 +94,36 @@ func TestCachingMiddleware(t *testing.T) {
 
 			resp, err := cdt.MiddlewareHandler.QueryData(req.Context(), qdr)
 			assert.NoError(t, err)
-			// Cache service is called once
 			cs.AssertCalls(t, "HandleQueryRequest", 1)
-			// Equals nil (returned by the decorator test)
 			assert.Nil(t, resp)
-			// Since it was a miss, the middleware called the update func
 			assert.True(t, updateCacheCalled)
-			// Since the feature flag was not set, the middleware did not call shouldCacheQuery
-			assert.False(t, shouldCacheQueryCalled)
+			assert.True(t, shouldCacheQueryCalled)
 		})
 
-		t.Run("with async queries", func(t *testing.T) {
-			cachingServiceClient := caching.ProvideCachingServiceClient(cs, featuremgmt.WithFeatures(featuremgmt.FlagAwsAsyncQueryCaching))
-			asyncCdt := handlertest.NewHandlerMiddlewareTest(t,
-				WithReqContext(req, &user.SignedInUser{}),
-				handlertest.WithMiddlewares(
-					NewCachingMiddleware(cachingServiceClient)),
-			)
-			t.Run("If shoudCacheQuery returns true update cache function is called", func(t *testing.T) {
-				origShouldCacheQuery := caching.ShouldCacheQuery
-				var shouldCacheQueryCalled bool
-				caching.ShouldCacheQuery = func(resp *backend.QueryDataResponse) bool {
-					shouldCacheQueryCalled = true
-					return true
-				}
+		t.Run("If cache returns a miss and the query should not be cached, the update cache function is not called", func(t *testing.T) {
+			origShouldCacheQuery := caching.ShouldCacheQuery
+			var shouldCacheQueryCalled bool
+			caching.ShouldCacheQuery = func(resp *backend.QueryDataResponse) bool {
+				shouldCacheQueryCalled = true
+				return false
+			}
 
-				t.Cleanup(func() {
-					updateCacheCalled = false
-					shouldCacheQueryCalled = false
-					caching.ShouldCacheQuery = origShouldCacheQuery
-					cs.Reset()
-				})
-
-				cs.ReturnHit = false
-				cs.ReturnQueryResponse = dataResponse
-
-				resp, err := asyncCdt.MiddlewareHandler.QueryData(req.Context(), qdr)
-				assert.NoError(t, err)
-				// Cache service is called once
-				cs.AssertCalls(t, "HandleQueryRequest", 1)
-				// Equals nil (returned by the decorator test)
-				assert.Nil(t, resp)
-				// Since it was a miss, the middleware called the update func
-				assert.True(t, updateCacheCalled)
-				// Since the feature flag set, the middleware called shouldCacheQuery
-				assert.True(t, shouldCacheQueryCalled)
+			t.Cleanup(func() {
+				updateCacheCalled = false
+				shouldCacheQueryCalled = false
+				caching.ShouldCacheQuery = origShouldCacheQuery
+				cs.Reset()
 			})
 
-			t.Run("If shoudCacheQuery returns false update cache function is not called", func(t *testing.T) {
-				origShouldCacheQuery := caching.ShouldCacheQuery
-				var shouldCacheQueryCalled bool
-				caching.ShouldCacheQuery = func(resp *backend.QueryDataResponse) bool {
-					shouldCacheQueryCalled = true
-					return false
-				}
+			cs.ReturnHit = false
+			cs.ReturnQueryResponse = dataResponse
 
-				t.Cleanup(func() {
-					updateCacheCalled = false
-					shouldCacheQueryCalled = false
-					caching.ShouldCacheQuery = origShouldCacheQuery
-					cs.Reset()
-				})
-
-				cs.ReturnHit = false
-				cs.ReturnQueryResponse = dataResponse
-
-				resp, err := asyncCdt.MiddlewareHandler.QueryData(req.Context(), qdr)
-				assert.NoError(t, err)
-				// Cache service is called once
-				cs.AssertCalls(t, "HandleQueryRequest", 1)
-				// Equals nil (returned by the decorator test)
-				assert.Nil(t, resp)
-				// Since it was a miss, the middleware called the update func
-				assert.False(t, updateCacheCalled)
-				// Since the feature flag set, the middleware called shouldCacheQuery
-				assert.True(t, shouldCacheQueryCalled)
-			})
+			resp, err := cdt.MiddlewareHandler.QueryData(req.Context(), qdr)
+			assert.NoError(t, err)
+			cs.AssertCalls(t, "HandleQueryRequest", 1)
+			assert.Nil(t, resp)
+			assert.False(t, updateCacheCalled)
+			assert.True(t, shouldCacheQueryCalled)
 		})
 	})
 
@@ -198,7 +151,7 @@ func TestCachingMiddleware(t *testing.T) {
 		}
 
 		cs := caching.NewFakeOSSCachingService()
-		cachingServiceClient := caching.ProvideCachingServiceClient(cs, nil)
+		cachingServiceClient := caching.ProvideCachingServiceClient(cs)
 		cdt := handlertest.NewHandlerMiddlewareTest(t,
 			WithReqContext(req, &user.SignedInUser{}),
 			handlertest.WithMiddlewares(NewCachingMiddleware(cachingServiceClient)),
@@ -275,7 +228,7 @@ func TestCachingMiddleware(t *testing.T) {
 		require.NoError(t, err)
 
 		cs := caching.NewFakeOSSCachingService()
-		cachingServiceClient := caching.ProvideCachingServiceClient(cs, nil)
+		cachingServiceClient := caching.ProvideCachingServiceClient(cs)
 		cdt := handlertest.NewHandlerMiddlewareTest(t,
 			// Skip the request context in this case
 			handlertest.WithMiddlewares(NewCachingMiddleware(cachingServiceClient)),

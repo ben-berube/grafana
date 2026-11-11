@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 	cloudwatchtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
 
-	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/features"
 	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -17,18 +16,34 @@ import (
 )
 
 func TestGetMetricDataExecutorTestRequest(t *testing.T) {
-	t.Run("Should round up end time if cloudWatchRoundUpEndTime is enabled", func(t *testing.T) {
+	t.Run("rounds end time up to the next minute", func(t *testing.T) {
 		executor := &DataSource{}
-		queryEndTime, _ := time.Parse("2006-01-02T15:04:05Z07:00", "2024-05-01T01:45:04Z")
+		queryEndTime, _ := time.Parse(time.RFC3339, "2024-05-01T01:45:04Z")
 		inputs := &cloudwatch.GetMetricDataInput{EndTime: &queryEndTime, MetricDataQueries: []cloudwatchtypes.MetricDataQuery{}}
 		mockMetricClient := &mocks.MetricsAPI{}
 		mockMetricClient.On("GetMetricData", mock.Anything, mock.Anything, mock.Anything).Return(
 			&cloudwatch.GetMetricDataOutput{
 				MetricDataResults: []cloudwatchtypes.MetricDataResult{{Values: []float64{}}},
 			}, nil).Once()
-		_, err := executor.executeRequest(contextWithFeaturesEnabled(features.FlagCloudWatchRoundUpEndTime), mockMetricClient, inputs)
+		_, err := executor.executeRequest(context.Background(), mockMetricClient, inputs)
 		require.NoError(t, err)
-		expectedTime, _ := time.Parse("2006-01-02T15:04:05Z07:00", "2024-05-01T01:46:00Z")
+		expectedTime, _ := time.Parse(time.RFC3339, "2024-05-01T01:46:00Z")
+		expectedInput := &cloudwatch.GetMetricDataInput{EndTime: &expectedTime, MetricDataQueries: []cloudwatchtypes.MetricDataQuery{}}
+		mockMetricClient.AssertCalled(t, "GetMetricData", mock.Anything, expectedInput, mock.Anything)
+	})
+
+	t.Run("rounds an already aligned end time up to the next minute", func(t *testing.T) {
+		executor := &DataSource{}
+		queryEndTime, _ := time.Parse(time.RFC3339, "2024-05-01T01:45:00Z")
+		inputs := &cloudwatch.GetMetricDataInput{EndTime: &queryEndTime, MetricDataQueries: []cloudwatchtypes.MetricDataQuery{}}
+		mockMetricClient := &mocks.MetricsAPI{}
+		mockMetricClient.On("GetMetricData", mock.Anything, mock.Anything, mock.Anything).Return(
+			&cloudwatch.GetMetricDataOutput{
+				MetricDataResults: []cloudwatchtypes.MetricDataResult{{Values: []float64{}}},
+			}, nil).Once()
+		_, err := executor.executeRequest(context.Background(), mockMetricClient, inputs)
+		require.NoError(t, err)
+		expectedTime, _ := time.Parse(time.RFC3339, "2024-05-01T01:46:00Z")
 		expectedInput := &cloudwatch.GetMetricDataInput{EndTime: &expectedTime, MetricDataQueries: []cloudwatchtypes.MetricDataQuery{}}
 		mockMetricClient.AssertCalled(t, "GetMetricData", mock.Anything, expectedInput, mock.Anything)
 	})

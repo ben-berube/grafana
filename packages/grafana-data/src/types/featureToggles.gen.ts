@@ -64,11 +64,6 @@ export interface FeatureToggles {
   */
   lokiShardSplitting?: boolean;
   /**
-  * Split large interval queries into subqueries with smaller time intervals
-  * @default true
-  */
-  lokiQuerySplitting?: boolean;
-  /**
   * populate star status from apiserver
   * @default false
   */
@@ -138,11 +133,6 @@ export interface FeatureToggles {
   * @default false
   */
   grafanaAPIServerEnsureKubectlAccess?: boolean;
-  /**
-  * Enable caching for async queries for Redshift and Athena. Requires that the data source has caching and async query support enabled
-  * @default true
-  */
-  awsAsyncQueryCaching?: boolean;
   /**
   * Enable changing the scheduler base interval via configuration option unified_alerting.scheduler_tick_interval
   * @default false
@@ -303,16 +293,6 @@ export interface FeatureToggles {
   * @default false
   */
   alertmanagerRemotePrimary?: boolean;
-  /**
-  * Change the way annotation permissions work by scoping them to folders and dashboards.
-  * @default true
-  */
-  annotationPermissionUpdate?: boolean;
-  /**
-  * Enables annotation clustering and switches to refactored annotation code
-  * @default true
-  */
-  annotationsClustering?: boolean;
   /**
   * Enables new dashboard layouts
   * @default true
@@ -658,17 +638,6 @@ export interface FeatureToggles {
   * @default false
   */
   enableScopesInMetricsExplore?: boolean;
-  /**
-  * Round up end time for metric queries to the next minute to avoid missing data
-  * @default true
-  */
-  cloudWatchRoundUpEndTime?: boolean;
-  /**
-  * Deprecated. Allow override default AAD audience for Azure Prometheus endpoint. Enabled by default. This feature should no longer be used and will be removed in the future.
-  * @deprecated
-  * @default true
-  */
-  prometheusAzureOverrideAudience?: boolean;
   /**
   * Allows authenticated API calls in actions
   * @default false
@@ -1186,25 +1155,10 @@ export interface FeatureToggles {
   */
   pluginInstallAPISync?: boolean;
   /**
-  * Enable style actions (copy/paste) in the panel editor
-  * @default true
-  */
-  panelStyleActions?: boolean;
-  /**
-  * Enable visualization presets
-  * @default true
-  */
-  vizPresets?: boolean;
-  /**
   * Enable field overrides for FieldType.nestedFrames fields (like in nested tables)
   * @default false
   */
   nestedFramesFieldOverrides?: boolean;
-  /**
-  * Enable faceted labels filter for series visibility in the legend
-  * @default true
-  */
-  vizLegendFacetedFilter?: boolean;
   /**
   * Render native histogram (exponential and NHCB) zero and negative heatmap buckets on a symlog y-axis
   * @default false

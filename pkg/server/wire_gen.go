@@ -637,7 +637,7 @@ func Initialize(ctx context.Context, cfg *setting.Cfg, opts Options, apiOpts api
 	}
 	oauthtokenService := oauthtoken.ProvideService(socialService, authinfoimplService, cfg, registerer, serverLockService, tracingService, userAuthTokenService, featureToggles)
 	ossCachingService := caching.ProvideCachingService()
-	cachingServiceClient := caching.ProvideCachingServiceClient(ossCachingService, featureToggles)
+	cachingServiceClient := caching.ProvideCachingServiceClient(ossCachingService)
 	middlewareHandler, err := pluginsintegration.ProvideClientWithMiddlewares(cfg, inMemory, oauthtokenService, tracingService, cachingServiceClient, featureToggles, registerer)
 	if err != nil {
 		return nil, err
@@ -1365,7 +1365,7 @@ func InitializeForTest(ctx context.Context, t sqlutil.ITestDB, testingT interfac
 	datasourcePermissionsService := ossaccesscontrol.ProvideDatasourcePermissionsService(cfg, featureToggles, sqlStore)
 	oauthtokentestService := oauthtokentest.ProvideService()
 	ossCachingService := caching.ProvideCachingService()
-	cachingServiceClient := caching.ProvideCachingServiceClient(ossCachingService, featureToggles)
+	cachingServiceClient := caching.ProvideCachingServiceClient(ossCachingService)
 	middlewareHandler, err := pluginsintegration.ProvideClientWithMiddlewares(cfg, inMemory, oauthtokentestService, tracingService, cachingServiceClient, featureToggles, registerer)
 	if err != nil {
 		return nil, err

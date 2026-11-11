@@ -1,7 +1,7 @@
 import { getDataSourceRef, type IntervalVariableModel, type ScopedVars } from '@grafana/data';
 import { t } from '@grafana/i18n';
 import { config, getDataSourceSrv } from '@grafana/runtime';
-import { FlagKeys, getFeatureFlagClient, useFlagGrafanaScenesFlickeringFix } from '@grafana/runtime/internal';
+import { FlagKeys, getFeatureFlagClient } from '@grafana/runtime/internal';
 import {
   type CancelActivationHandler,
   type CustomVariable,
@@ -565,9 +565,6 @@ export function hasActualSaveChanges(dashboard: DashboardScene) {
   return !!changes.diffCount;
 }
 
-export function useScenesFlickeringFix() {
-  const scenesFlickeringFix = useFlagGrafanaScenesFlickeringFix();
-  if (scenesFlickeringFix) {
-    SceneObjectBase.RENDER_BEFORE_ACTIVATION_DEFAULT = true;
-  }
+export function applyScenesFlickeringFix() {
+  SceneObjectBase.RENDER_BEFORE_ACTIVATION_DEFAULT = true;
 }
