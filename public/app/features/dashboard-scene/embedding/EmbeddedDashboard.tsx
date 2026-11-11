@@ -11,13 +11,13 @@ import { DashboardRoutes } from 'app/types/dashboard';
 
 import { getDashboardScenePageStateManager } from '../pages/DashboardScenePageStateManager';
 import { type DashboardScene } from '../scene/DashboardScene';
-import { useScenesFlickeringFix } from '../utils/utils';
+import { applyScenesFlickeringFix } from '../utils/utils';
 
 export function EmbeddedDashboard(props: EmbeddedDashboardProps) {
   const stateManager = getDashboardScenePageStateManager();
   const { dashboard, loadError } = stateManager.useState();
 
-  useScenesFlickeringFix();
+  applyScenesFlickeringFix();
 
   useEffect(() => {
     stateManager.loadDashboard({ uid: props.uid!, route: DashboardRoutes.Embedded });

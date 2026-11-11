@@ -32,7 +32,7 @@ import { DashboardTemplateUseBanner } from '../components/DashboardTemplateUseBa
 import { SuggestedDashboardsBanner } from '../components/SuggestedDashboardsBanner';
 import { DashboardPrompt } from '../saving/DashboardPrompt';
 import { preserveDashboardSceneStateInLocalStorage } from '../utils/dashboardSessionState';
-import { useScenesFlickeringFix } from '../utils/utils';
+import { applyScenesFlickeringFix } from '../utils/utils';
 
 import { getDashboardScenePageStateManager } from './DashboardScenePageStateManager';
 import { shouldHideDashboardKioskFooter } from './utils';
@@ -56,7 +56,7 @@ export function DashboardScenePage({ route, queryParams, location }: Props) {
   const routeReloadCounter = (location.state as any)?.routeReloadCounter;
   const prevParams = useRef<Params<string>>(params);
 
-  useScenesFlickeringFix();
+  applyScenesFlickeringFix();
 
   useEffect(() => {
     if (route.routeName === DashboardRoutes.Normal && type === 'snapshot') {

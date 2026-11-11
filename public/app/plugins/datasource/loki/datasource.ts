@@ -374,7 +374,7 @@ export class LokiDatasource
 
     if (config.featureToggles.lokiShardSplitting && requestSupportsSharding(fixedRequest.targets)) {
       return runShardSplitQuery(this, fixedRequest);
-    } else if (config.featureToggles.lokiQuerySplitting && requestSupportsSplitting(fixedRequest.targets)) {
+    } else if (requestSupportsSplitting(fixedRequest.targets)) {
       return runSplitQuery(this, fixedRequest);
     }
 

@@ -1,4 +1,4 @@
-import { VizPanel, SceneGridLayout } from '@grafana/scenes';
+import { SceneObjectBase, VizPanel, SceneGridLayout } from '@grafana/scenes';
 import { type Dashboard, type Panel, type RowPanel } from '@grafana/schema';
 
 import { DashboardScene } from '../scene/DashboardScene';
@@ -10,7 +10,12 @@ import { DefaultGridLayoutManager } from '../scene/layout-default/DefaultGridLay
 import { RowItem } from '../scene/layout-rows/RowItem';
 import { TabItem } from '../scene/layout-tabs/TabItem';
 
-import { isValidLibraryPanelRef, hasLibraryPanelsInV1Dashboard, getLayoutForObject } from './utils';
+import {
+  isValidLibraryPanelRef,
+  hasLibraryPanelsInV1Dashboard,
+  getLayoutForObject,
+  applyScenesFlickeringFix,
+} from './utils';
 
 describe('utils', () => {
   describe('isValidLibraryPanelRef', () => {
@@ -453,6 +458,20 @@ describe('utils', () => {
       expect(layout).toBe(autoGrid);
       expect(layout).toBeInstanceOf(AutoGridLayoutManager);
     });
+  });
+});
+
+describe('applyScenesFlickeringFix', () => {
+  it('always renders scenes before activation', () => {
+    const previous = SceneObjectBase.RENDER_BEFORE_ACTIVATION_DEFAULT;
+    SceneObjectBase.RENDER_BEFORE_ACTIVATION_DEFAULT = false;
+
+    try {
+      applyScenesFlickeringFix();
+      expect(SceneObjectBase.RENDER_BEFORE_ACTIVATION_DEFAULT).toBe(true);
+    } finally {
+      SceneObjectBase.RENDER_BEFORE_ACTIVATION_DEFAULT = previous;
+    }
   });
 });
 

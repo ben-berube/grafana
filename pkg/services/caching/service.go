@@ -17,7 +17,6 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana/pkg/services/contexthandler"
-	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -159,10 +158,9 @@ func (e *JSONEncoder) Decode(r io.Reader, v interface{}) error {
 // the caching logic at every call site.
 type CachingServiceClient struct {
 	cachingService CachingService
-	features       featuremgmt.FeatureToggles
 }
 
-func ProvideCachingServiceClient(cachingService CachingService, features featuremgmt.FeatureToggles) *CachingServiceClient {
+func ProvideCachingServiceClient(cachingService CachingService) *CachingServiceClient {
 	log := log.New("caching_service_client")
 	if err := prometheus.Register(QueryCachingRequestHistogram); err != nil {
 		log.Error("Error registering prometheus collector 'QueryRequestHistogram'", "error", err)
@@ -170,7 +168,7 @@ func ProvideCachingServiceClient(cachingService CachingService, features feature
 	if err := prometheus.Register(ResourceCachingRequestHistogram); err != nil {
 		log.Error("Error registering prometheus collector 'ResourceRequestHistogram'", "error", err)
 	}
-	return &CachingServiceClient{cachingService: cachingService, features: features}
+	return &CachingServiceClient{cachingService: cachingService}
 }
 
 // WithQueryDataCaching calls `f` and caches the returned value if `req` has not been cached already.
@@ -207,27 +205,20 @@ func (c *CachingServiceClient) WithQueryDataCaching(ctx context.Context, req *ba
 
 	// Cache miss; do the actual queries
 	resp, err := f()
-	// Update the query cache with the result for this metrics request
-	if err == nil && cr.UpdateCacheFn != nil {
-		// If AWS async caching is not enabled, use the old code path
-		//nolint:staticcheck // not yet migrated to OpenFeature
-		if c.features == nil || !c.features.IsEnabled(ctx, featuremgmt.FlagAwsAsyncQueryCaching) {
-			cr.UpdateCacheFn(ctx, resp)
-		} else if reqCtx != nil {
-			// time how long shouldCacheQuery takes
-			startShouldCacheQuery := time.Now()
-			shouldCache := ShouldCacheQuery(resp)
-			ShouldCacheQueryHistogram.With(prometheus.Labels{
-				"datasource_type": req.PluginContext.DataSourceInstanceSettings.Type,
-				"cache":           string(status),
-				"shouldCache":     strconv.FormatBool(shouldCache),
-				"query_type":      getQueryType(reqCtx),
-			}).Observe(time.Since(startShouldCacheQuery).Seconds())
+	// Update the query cache with the result for this metrics request.
+	// Running async queries are left uncached so a later poll can observe completion.
+	if err == nil && cr.UpdateCacheFn != nil && reqCtx != nil {
+		startShouldCacheQuery := time.Now()
+		shouldCache := ShouldCacheQuery(resp)
+		ShouldCacheQueryHistogram.With(prometheus.Labels{
+			"datasource_type": req.PluginContext.DataSourceInstanceSettings.Type,
+			"cache":           string(status),
+			"shouldCache":     strconv.FormatBool(shouldCache),
+			"query_type":      getQueryType(reqCtx),
+		}).Observe(time.Since(startShouldCacheQuery).Seconds())
 
-			// If AWS async caching is enabled and resp is for a running async query, don't cache it
-			if shouldCache {
-				cr.UpdateCacheFn(ctx, resp)
-			}
+		if shouldCache {
+			cr.UpdateCacheFn(ctx, resp)
 		}
 	}
 

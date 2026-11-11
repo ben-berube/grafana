@@ -15,7 +15,7 @@ import { DashboardRoutes } from 'app/types/dashboard';
 
 import { getDashboardScenePageStateManager } from '../pages/DashboardScenePageStateManager';
 import { type DashboardScene } from '../scene/DashboardScene';
-import { useScenesFlickeringFix } from '../utils/utils';
+import { applyScenesFlickeringFix } from '../utils/utils';
 
 import { SoloPanelContextProvider, useDefineSoloPanelContext } from './SoloPanelContext';
 import { SoloPanelPageLogo } from './SoloPanelPageLogo';
@@ -31,7 +31,7 @@ export function SoloPanelPage({ queryParams }: Props) {
   const { dashboard, loadError } = stateManager.useState();
   const { uid = '', type, slug } = useParams();
 
-  useScenesFlickeringFix();
+  applyScenesFlickeringFix();
 
   useEffect(() => {
     stateManager.loadDashboard({ uid, type, slug, route: DashboardRoutes.Embedded });
