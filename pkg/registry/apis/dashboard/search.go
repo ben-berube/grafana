@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/codes"
@@ -489,6 +490,18 @@ func (s *SearchHandler) DoSearch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if queryParams.Get("stale") == "true" {
+		parsedResults, err := dashboardsearch.SearchStaleDashboards(ctx, searchRequest, func(ctx context.Context, req *resourcepb.ResourceSearchRequest) (*resourcepb.ResourceSearchResponse, error) {
+			return s.client.Search(ctx, req)
+		}, time.Now())
+		if err != nil {
+			errhttp.Write(ctx, err, w)
+			return
+		}
+		s.write(w, parsedResults)
+		return
+	}
+
 	result, err := s.client.Search(ctx, searchRequest)
 	if err != nil {
 		errhttp.Write(ctx, err, w)
@@ -512,6 +525,8 @@ func (s *SearchHandler) DoSearch(w http.ResponseWriter, r *http.Request) {
 			return parsedResults.Hits[i].Resource > parsedResults.Hits[j].Resource
 		})
 	}
+
+	dashboardsearch.AnnotateStale(parsedResults.Hits, time.Now())
 
 	s.write(w, parsedResults)
 }
@@ -639,7 +654,7 @@ func convertHttpSearchRequestToResourceSearchRequest(queryParams url.Values, use
 		Page:    int64(page), // for modes 0-2 (legacy)
 		Explain: queryParams.Has("explain") && queryParams.Get("explain") != "false",
 	}
-	fields := []string{"title", "folder", "tags", "description", "manager.kind", "manager.id", resource.SEARCH_FIELD_OWNER_REFERENCES}
+	fields := []string{"title", "folder", "tags", "description", "manager.kind", "manager.id", resource.SEARCH_FIELD_OWNER_REFERENCES, resource.SEARCH_FIELD_UPDATED}
 	if queryParams.Has("field") {
 		// add fields to search and exclude duplicates
 		for _, f := range queryParams["field"] {

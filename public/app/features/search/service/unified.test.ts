@@ -1,5 +1,7 @@
+import { http, HttpResponse } from 'msw';
+
 import { config, setBackendSrv } from '@grafana/runtime';
-import { getCustomSearchHandler } from '@grafana/test-utils/handlers';
+import { getCustomSearchHandler, searchRoute } from '@grafana/test-utils/handlers';
 import server, { setupMockServer } from '@grafana/test-utils/server';
 import { backendSrv } from 'app/core/services/backend_srv';
 
@@ -132,6 +134,20 @@ describe('Unified Storage Searcher', () => {
     expect(response.view.get(0).name).toBe('Team owned dashboard');
     expect(response.view.get(0).uid).toBe('team-owned-dashboard');
   });
+
+  it('asks the backend for stale dashboards only', async () => {
+    let stale: string | null = null;
+    server.use(
+      http.get(searchRoute, ({ request }) => {
+        stale = new URL(request.url).searchParams.get('stale');
+        return HttpResponse.json({ totalHits: 0, hits: [] });
+      })
+    );
+
+    await new UnifiedSearcher().search({ query: '*', stale: true });
+
+    expect(stale).toBe('true');
+  });
 });
 
 describe('toDashboardResults', () => {
@@ -228,6 +244,36 @@ describe('toDashboardResults', () => {
     const descriptionField = results.fields.find((f) => f.name === 'description');
     expect(descriptionField).toBeDefined();
     expect(descriptionField!.values).toEqual(['', 'A helpful description']);
+  });
+
+  it('keeps the stale flag from the search hit', () => {
+    const mockResponse: SearchAPIResponse = {
+      totalHits: 2,
+      hits: [
+        {
+          resource: 'dashboards',
+          name: 'old',
+          title: 'Old',
+          folder: 'general',
+          tags: [],
+          field: { stale: true },
+          url: '/d/old',
+        },
+        {
+          resource: 'dashboards',
+          name: 'new',
+          title: 'New',
+          folder: 'general',
+          tags: [],
+          field: { stale: false },
+          url: '/d/new',
+        },
+      ],
+    };
+
+    const results = toDashboardResults(mockResponse, '');
+    const staleField = results.fields.find((field) => field.name === 'stale');
+    expect(staleField?.values).toEqual([true, false]);
   });
 
   describe('respects appSubUrl in search result URLs', () => {

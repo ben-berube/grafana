@@ -148,6 +148,58 @@ describe('SearchResultsTable', () => {
 
       expect(screen.queryByLabelText('Description')).not.toBeInTheDocument();
     });
+
+    it('shows a Stale badge only on dashboards the backend marked stale', async () => {
+      const searchData = toDataFrame({
+        name: 'A',
+        fields: [
+          {
+            name: 'kind',
+            type: FieldType.string,
+            config: {},
+            values: [DashboardSearchItemType.DashDB, DashboardSearchItemType.DashDB],
+          },
+          { name: 'uid', type: FieldType.string, config: {}, values: ['old', 'new'] },
+          { name: 'name', type: FieldType.string, config: {}, values: ['Old dashboard', 'New dashboard'] },
+          { name: 'panel_type', type: FieldType.string, config: {}, values: ['', ''] },
+          { name: 'url', type: FieldType.string, config: {}, values: ['/old', '/new'] },
+          { name: 'tags', type: FieldType.other, config: {}, values: [[], []] },
+          { name: 'ds_uid', type: FieldType.other, config: {}, values: ['', ''] },
+          { name: 'location', type: FieldType.string, config: {}, values: ['general', 'general'] },
+          { name: 'stale', type: FieldType.boolean, config: {}, values: [true, false] },
+        ],
+      });
+      const dataFrames = applyFieldOverrides({
+        data: [searchData],
+        fieldConfig: { defaults: {}, overrides: [] },
+        replaceVariables: (value) => value,
+        theme: createTheme(),
+      });
+      const response: QueryResponse = {
+        isItemLoaded: jest.fn().mockReturnValue(true),
+        loadMoreItems: jest.fn(),
+        totalRows: searchData.length,
+        view: new DataFrameView<DashboardQueryResult>(dataFrames[0]),
+      };
+
+      render(
+        <SearchResultsTable
+          keyboardEvents={mockKeyboardEvents}
+          response={response}
+          onTagSelected={mockOnTagSelected}
+          selection={mockSelection}
+          selectionToggle={mockSelectionToggle}
+          clearSelection={mockClearSelection}
+          height={1000}
+          width={1000}
+        />
+      );
+      await screen.findByRole('table');
+
+      expect(screen.getAllByText('Stale')).toHaveLength(1);
+      expect(screen.getByText('Old dashboard')).toBeInTheDocument();
+      expect(screen.getByText('New dashboard')).toBeInTheDocument();
+    });
   });
 
   describe('when an item has a description', () => {

@@ -4,7 +4,7 @@ import Skeleton from 'react-loading-skeleton';
 import { type GrafanaTheme2 } from '@grafana/data';
 import { Trans, t } from '@grafana/i18n';
 import { reportInteraction } from '@grafana/runtime';
-import { Avatar, Icon, IconButton, Link, Spinner, Text, useStyles2 } from '@grafana/ui';
+import { Avatar, Badge, Icon, IconButton, Link, Spinner, Text, useStyles2 } from '@grafana/ui';
 import { getSvgSize } from '@grafana/ui/internal';
 import { DescriptionTooltip } from 'app/features/search/components/DescriptionTooltip';
 import { getIconForItem } from 'app/features/search/service/utils';
@@ -110,6 +110,14 @@ export function NameCell({ row: { original: data }, onFolderClick, treeID }: Nam
             item.title
           )}
         </Text>
+
+        {item.kind === 'dashboard' && item.stale ? (
+          <Badge
+            color="orange"
+            text={t('search.stale.badge', 'Stale')}
+            tooltip={t('search.stale.badge-tooltip', "Hasn't been updated in a while")}
+          />
+        ) : null}
 
         <FolderRepo folder={item} />
 

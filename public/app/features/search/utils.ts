@@ -11,7 +11,9 @@ export const hasFilters = (query: SearchState) => {
   if (!query) {
     return false;
   }
-  return Boolean(query.query || query.tag?.length > 0 || query.ownerReference?.length || query.starred || query.sort);
+  return Boolean(
+    query.query || query.tag?.length > 0 || query.ownerReference?.length || query.starred || query.stale || query.sort
+  );
 };
 
 /** Cleans up old local storage values that remembered many open folders */
@@ -46,6 +48,8 @@ export const parseRouteParams = (params: UrlQueryMap) => {
       return { ...obj, tag: [val.toString()] };
     } else if (key === 'ownerReference' && !Array.isArray(val)) {
       return { ...obj, ownerReference: [val.toString()] };
+    } else if (key === 'stale') {
+      return { ...obj, stale: val === true || val === 'true' };
     }
 
     return { ...obj, [key]: val };
@@ -70,6 +74,7 @@ export function needsListLayout(q: Partial<SearchState>) {
     q.query ||
     q.sort ||
     q.starred ||
+    q.stale ||
     q.tag?.length ||
     q.createdBy ||
     q.ownerReference?.length ||

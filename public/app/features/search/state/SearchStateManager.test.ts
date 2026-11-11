@@ -214,6 +214,27 @@ describe('SearchStateManager', () => {
     });
   });
 
+  describe('onStaleFilterChange', () => {
+    it('searches with stale=true and clears it when unchecked', async () => {
+      const seen: string[] = [];
+      server.use(
+        http.get(searchRoute, ({ request }) => {
+          seen.push(new URL(request.url).searchParams.get('stale') ?? '');
+          return HttpResponse.json({ totalHits: 0, hits: [] });
+        })
+      );
+
+      const stm = createSearchStateManager();
+      stm.onStaleFilterChange({ currentTarget: { checked: true } } as React.FormEvent<HTMLInputElement>);
+
+      await waitFor(() => expect(seen).toContain('true'));
+      expect(stm.state.stale).toBe(true);
+
+      stm.onStaleFilterChange({ currentTarget: { checked: false } } as React.FormEvent<HTMLInputElement>);
+      await waitFor(() => expect(stm.state.stale).toBe(false));
+    });
+  });
+
   describe('onLayoutChange', () => {
     beforeEach(() => {
       localStorage.clear();

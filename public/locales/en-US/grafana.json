@@ -14512,6 +14512,7 @@
       "created-by-me": "Created by me",
       "include-panels": "Include panels",
       "remove-datasource-filter": "Datasource: {{datasource}}",
+      "show-stale-only": "Show stale only",
       "sort-placeholder": "Sort",
       "starred": "Starred",
       "view-as-folders": "View by folders",
@@ -14552,6 +14553,10 @@
     "search-results-table": {
       "aria-label-search-results-table": "Search results table",
       "no-data": "No values"
+    },
+    "stale": {
+      "badge": "Stale",
+      "badge-tooltip": "Hasn't been updated in a while"
     },
     "unified-searcher": {
       "opts": {

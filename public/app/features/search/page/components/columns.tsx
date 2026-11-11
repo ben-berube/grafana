@@ -13,7 +13,7 @@ import {
 import { Trans, t } from '@grafana/i18n';
 import { config, getDataSourceSrv } from '@grafana/runtime';
 import { type PanelPluginMetas } from '@grafana/runtime/internal';
-import { Checkbox, Icon, type IconName, TagList, Text, Tooltip } from '@grafana/ui';
+import { Badge, Checkbox, Icon, type IconName, TagList, Text, Tooltip } from '@grafana/ui';
 import { appEvents } from 'app/core/app_events';
 import { formatDate, formatDuration } from 'app/core/internationalization/dates';
 import { PluginIconName } from 'app/features/plugins/admin/types';
@@ -121,6 +121,7 @@ export const generateColumns = (
       let name = access.name.values[p.row.index];
       const isDeleted = access.isDeleted?.values[p.row.index];
       const description = access.description?.values[p.row.index];
+      const isStale = access.stale?.values[p.row.index] === true;
 
       if (!name?.length) {
         const loading = p.row.index >= response.view.dataFrame.length;
@@ -141,6 +142,13 @@ export const generateColumns = (
               {name}
             </a>
           )}
+          {isLoaded && isStale ? (
+            <Badge
+              color="orange"
+              text={t('search.stale.badge', 'Stale')}
+              tooltip={t('search.stale.badge-tooltip', "Hasn't been updated in a while")}
+            />
+          ) : null}
           {isLoaded ? <DescriptionTooltip description={description} /> : null}
         </div>
       );

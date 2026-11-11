@@ -144,6 +144,7 @@ export function queryResultToViewItem(
     url: item.url,
     tags: item.tags ?? [],
     managedBy: managedByStr,
+    ...(item.stale === true ? { stale: true } : {}),
   };
 
   // Set enterprise sort value property

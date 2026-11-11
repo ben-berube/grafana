@@ -8,6 +8,7 @@ export function BrowseFilters() {
   return (
     <ActionRow
       showStarredFilter
+      showStaleFilter
       showLayout
       state={searchState}
       getTagOptions={stateManager.getTagOptions}
@@ -15,6 +16,7 @@ export function BrowseFilters() {
       sortPlaceholder={getGrafanaSearcher().sortPlaceholder}
       onLayoutChange={stateManager.onLayoutChange}
       onStarredFilterChange={stateManager.onStarredFilterChange}
+      onStaleFilterChange={stateManager.onStaleFilterChange}
       onSortChange={stateManager.onSortChange}
       onTagFilterChange={stateManager.onTagFilterChange}
       onDatasourceChange={stateManager.onDatasourceChange}

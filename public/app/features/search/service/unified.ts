@@ -45,7 +45,7 @@ export type SearchHit = {
   folder: string;
   tags: string[];
 
-  field: Record<string, string | number>; // extra fields from the backend - sort fields included here as well
+  field: Record<string, string | number | boolean>; // extra fields from the backend - sort fields included here as well
 
   // calculated in the frontend
   url: string;
@@ -362,6 +362,10 @@ export class UnifiedSearcher implements GrafanaSearcher {
 
     if (query.permission) {
       uri += `&permission=${query.permission}`;
+    }
+
+    if (query.stale) {
+      uri += '&stale=true';
     }
 
     if (query.deleted) {

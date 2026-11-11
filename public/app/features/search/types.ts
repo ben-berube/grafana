@@ -63,6 +63,9 @@ export interface DashboardViewItem {
     title: string;
     avatarUrl?: string;
   };
+
+  // Set when the dashboard has not been updated within the stale threshold.
+  stale?: boolean;
 }
 
 export type EventTrackingNamespace = 'manage_dashboards' | 'dashboard_search';
@@ -74,6 +77,8 @@ export interface SearchState {
   // is "iam.grafana.app/Team/{teamUID}"
   ownerReference?: string[];
   starred: boolean;
+  // Dashboards that have not been updated within the stale threshold.
+  stale?: boolean;
   explain?: boolean; // adds debug info
   datasource?: string;
   panel_type?: string;

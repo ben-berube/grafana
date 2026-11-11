@@ -224,6 +224,11 @@ describe('queryResultToViewItem', () => {
 
     expect(viewItem.description).toBeUndefined();
   });
+
+  it('marks the view item stale only when the search result says so', () => {
+    expect(queryResultToViewItem(makeQueryResult({ stale: true })).stale).toBe(true);
+    expect(queryResultToViewItem(makeQueryResult()).stale).toBeUndefined();
+  });
 });
 
 describe('formatDeletedByDisplayValue', () => {

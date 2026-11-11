@@ -227,7 +227,13 @@ func newResourceTableColumn(def *resourcepb.ResourceTableColumnDefinition, index
 		col.OpenAPIType = "number"
 		col.OpenAPIFormat = "int64"
 		col.reader = func(iter *jsoniter.Iterator) (any, error) {
-			return iter.ReadInt64()
+			// Bleve returns numeric fields as float64, and jsoniter may write
+			// those with a decimal. Millisecond timestamps stay exact in float64.
+			f, err := iter.ReadFloat64()
+			if err != nil {
+				return nil, err
+			}
+			return int64(f), nil
 		}
 
 	case resourcepb.ResourceTableColumnDefinition_DOUBLE:
@@ -509,6 +515,18 @@ func (x *resourceTableColumn) Encode(v any) ([]byte, error) {
 	return json.RawMessage(buff.Bytes()), nil
 }
 
+// useBinaryNumber reports whether buff is an 8-byte binary number rather than
+// a JSON number. JSON numbers are ASCII and can be longer than 8 bytes;
+// binary.Decode would still consume the first 8 and return success, which
+// corrupts timestamps and other large integers written as decimal text.
+func useBinaryNumber(buff []byte) bool {
+	if len(buff) != 8 {
+		return false
+	}
+	c := buff[0]
+	return c != '-' && (c < '0' || c > '9')
+}
+
 // nolint:gocyclo
 func (x *resourceTableColumn) Decode(buff []byte) (any, error) {
 	if len(buff) == 0 {
@@ -525,7 +543,7 @@ func (x *resourceTableColumn) Decode(buff []byte) (any, error) {
 				return buff[0] != 0, nil
 			}
 		case resourcepb.ResourceTableColumnDefinition_DOUBLE:
-			{
+			if useBinaryNumber(buff) {
 				var f float64
 				count, err := binary.Decode(buff, binary.BigEndian, &f)
 				if count == 8 && err == nil {
@@ -533,7 +551,7 @@ func (x *resourceTableColumn) Decode(buff []byte) (any, error) {
 				}
 			}
 		case resourcepb.ResourceTableColumnDefinition_INT64:
-			{
+			if useBinaryNumber(buff) {
 				var f int64
 				count, err := binary.Decode(buff, binary.BigEndian, &f)
 				if count == 8 && err == nil {
@@ -541,7 +559,7 @@ func (x *resourceTableColumn) Decode(buff []byte) (any, error) {
 				}
 			}
 		case resourcepb.ResourceTableColumnDefinition_DATE_TIME, resourcepb.ResourceTableColumnDefinition_DATE:
-			{
+			if useBinaryNumber(buff) {
 				var f int64
 				count, err := binary.Decode(buff, binary.BigEndian, &f)
 				if count == 8 && err == nil {

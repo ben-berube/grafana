@@ -28,12 +28,14 @@ function getLayoutOptions() {
 interface ActionRowProps {
   state: SearchState;
   showStarredFilter?: boolean;
+  showStaleFilter?: boolean;
   showLayout?: boolean;
   sortPlaceholder?: string;
 
   onLayoutChange: (layout: SearchLayout) => void;
   onSortChange: (value?: string) => void;
   onStarredFilterChange?: (event: FormEvent<HTMLInputElement>) => void;
+  onStaleFilterChange?: (event: FormEvent<HTMLInputElement>) => void;
   onTagFilterChange: (tags: string[]) => void;
   getTagOptions: () => Promise<TermCount[]>;
   getSortOptions: () => Promise<SelectableValue[]>;
@@ -58,11 +60,13 @@ function getValidQueryLayout(q: SearchState): SearchLayout {
 export const ActionRow = ({
   state,
   showStarredFilter,
+  showStaleFilter,
   showLayout,
   sortPlaceholder,
   onLayoutChange,
   onSortChange,
   onStarredFilterChange = () => {},
+  onStaleFilterChange = () => {},
   onTagFilterChange,
   getTagOptions,
   getSortOptions,
@@ -105,6 +109,15 @@ export const ActionRow = ({
               label={t('search.actions.starred', 'Starred')}
               onChange={onStarredFilterChange}
               value={state.starred}
+            />
+          </div>
+        )}
+        {showStaleFilter && (
+          <div className={styles.checkboxWrapper}>
+            <Checkbox
+              label={t('search.actions.show-stale-only', 'Show stale only')}
+              onChange={onStaleFilterChange}
+              value={Boolean(state.stale)}
             />
           </div>
         )}

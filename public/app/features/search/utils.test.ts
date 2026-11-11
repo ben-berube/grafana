@@ -1,5 +1,5 @@
 import { type SearchQueryParams } from './types';
-import { parseRouteParams } from './utils';
+import { needsListLayout, parseRouteParams } from './utils';
 
 describe('Search utils', () => {
   describe('parseRouteParams', () => {
@@ -53,6 +53,18 @@ describe('Search utils', () => {
         folder: 'current',
         query: 'folder:current test',
       });
+    });
+
+    it('reads stale=true from the url as a boolean', () => {
+      expect(parseRouteParams({ stale: 'true' })).toEqual({ stale: true });
+      expect(parseRouteParams({ stale: 'false' })).toEqual({ stale: false });
+    });
+  });
+
+  describe('needsListLayout', () => {
+    it('uses the list layout when the stale filter is on', () => {
+      expect(needsListLayout({ stale: true })).toBe(true);
+      expect(needsListLayout({})).toBeFalsy();
     });
   });
 });

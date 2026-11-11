@@ -44,6 +44,7 @@ func TestStandardDocumentBuilder(t *testing.T) {
 		"title_phrase": "test playlist from unified storage",
 		"created": 1717236672000,
 		"createdBy": "user:ABC",
+		"updated": 1719828672000,
 		"updatedBy": "user:XYZ",
 		"manager": {
 			"kind": "repo",

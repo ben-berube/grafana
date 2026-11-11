@@ -53,6 +53,7 @@ const createStateManager = () => ({
   getTagOptions: jest.fn().mockResolvedValue([]),
   onLayoutChange: jest.fn(),
   onStarredFilterChange: jest.fn(),
+  onStaleFilterChange: jest.fn(),
   onSortChange: jest.fn(),
   onTagFilterChange: jest.fn(),
   onDatasourceChange: jest.fn(),
@@ -117,5 +118,16 @@ describe('BrowseFilters', () => {
       'iam.grafana.app/Team/team-a',
       'iam.grafana.app/Team/test-team',
     ]);
+  });
+
+  it('toggles the stale-only filter', async () => {
+    const stateManager = createStateManager();
+    mockUseSearchStateManager.mockReturnValue([createSearchState(), stateManager]);
+
+    const { user } = render(<BrowseFilters />);
+
+    await user.click(screen.getByRole('checkbox', { name: 'Show stale only' }));
+
+    expect(stateManager.onStaleFilterChange).toHaveBeenCalled();
   });
 });

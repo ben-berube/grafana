@@ -28,6 +28,7 @@ export const initialState: SearchState = {
   tag: [],
   ownerReference: [],
   starred: false,
+  stale: false,
   layout: SearchLayout.Folders,
   sort: undefined,
   prevSort: undefined,
@@ -130,6 +131,7 @@ export class SearchStateManager extends StateManagerBase<SearchState> {
       panel_type: this.state.panel_type,
       createdBy: this.state.createdBy ?? null,
       starred: this.state.starred ? this.state.starred : null,
+      stale: this.state.stale ? this.state.stale : null,
       sort: this.state.sort,
     });
 
@@ -157,6 +159,7 @@ export class SearchStateManager extends StateManagerBase<SearchState> {
       panel_type: undefined,
       createdBy: undefined,
       starred: undefined,
+      stale: false,
       sort: undefined,
     });
   };
@@ -206,6 +209,10 @@ export class SearchStateManager extends StateManagerBase<SearchState> {
     this.setStateAndDoSearch({ starred: false });
   };
 
+  onStaleFilterChange = (e: FormEvent<HTMLInputElement>) => {
+    this.setStateAndDoSearch({ stale: e.currentTarget.checked });
+  };
+
   onSetStarred = (starred: boolean) => {
     if (starred !== this.state.starred) {
       this.setStateAndDoSearch({ starred });
@@ -251,6 +258,7 @@ export class SearchStateManager extends StateManagerBase<SearchState> {
         this.state.tag.length ||
         this.state.ownerReference?.length ||
         this.state.starred ||
+        this.state.stale ||
         this.state.panel_type ||
         this.state.createdBy ||
         this.state.sort ||
@@ -272,6 +280,7 @@ export class SearchStateManager extends StateManagerBase<SearchState> {
       explain: this.state.explain,
       withAllowedActions: this.state.explain, // allowedActions are currently not used for anything on the UI and added only in `explain` mode
       starred: this.state.starred,
+      stale: Boolean(this.state.stale),
       deleted: this.state.deleted,
     };
 

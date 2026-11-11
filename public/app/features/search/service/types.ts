@@ -37,6 +37,8 @@ export interface SearchQuery {
   // Used for pagination. See also offset param.
   from?: number;
   starred?: boolean;
+  // Only dashboards whose last update is older than the backend stale threshold.
+  stale?: boolean;
   permission?: PermissionLevel;
   deleted?: boolean;
   // Same as from, but as we have 2 different searcher backends, one uses from and the other offset

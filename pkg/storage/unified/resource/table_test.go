@@ -112,6 +112,13 @@ func TestColumnEncoding(t *testing.T) {
 		},
 		{
 			def: &resourcepb.ResourceTableColumnDefinition{
+				Type: resourcepb.ResourceTableColumnDefinition_INT64,
+			},
+			input:  int64(1785758400000),
+			output: int64(1785758400000),
+		},
+		{
+			def: &resourcepb.ResourceTableColumnDefinition{
 				Type:    resourcepb.ResourceTableColumnDefinition_INT64,
 				IsArray: true,
 			},
