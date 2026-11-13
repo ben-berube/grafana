@@ -1015,14 +1015,6 @@ var (
 			Expression:   "false",
 		},
 		{
-			Name:        "cloudWatchNewLabelParsing",
-			Description: "Updates CloudWatch label parsing to be more accurate",
-			Stage:       FeatureStageGeneralAvailability,
-			Expression:  "true", // enabled by default
-			Owner:       grafanaDataSourcesPlugins,
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
 			Name:            "disableNumericMetricsSortingInExpressions",
 			Description:     "In server-side expressions, disable the sorting of numeric-kind metrics by their metric name or labels.",
 			Stage:           FeatureStageExperimental,
@@ -1193,14 +1185,6 @@ var (
 			Stage:       FeatureStageGeneralAvailability,
 			Owner:       grafanaCatalogSquad,
 			Expression:  "false", // disabled by default
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
-			Name:        "azureMonitorPrometheusExemplars",
-			Description: "Allows configuration of Azure Monitor as a data source that can provide Prometheus exemplars",
-			Stage:       FeatureStageGeneralAvailability,
-			Owner:       grafanaDataSourcesPlugins,
-			Expression:  "true", // enabled by default
 			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
 		},
 		{
@@ -1434,14 +1418,6 @@ var (
 			Expression:  "false",
 		},
 		{
-			Name:        "alertingUIOptimizeReducer",
-			Description: "Enables removing the reducer from the alerting UI when creating a new alert rule and using instant query",
-			Stage:       FeatureStageGeneralAvailability,
-			Generate:    Generate{LegacyFrontend: true},
-			Owner:       grafanaAlertingSquad,
-			Expression:  "true", // enabled by default
-		},
-		{
 			Name:        "azureMonitorEnableUserAuth",
 			Description: "Enables user auth for Azure Monitor datasource only",
 			Stage:       FeatureStageGeneralAvailability,
@@ -1659,15 +1635,6 @@ var (
 			Generate:     Generate{LegacyGo: true, LegacyFrontend: true},
 		},
 		{
-			Name:         "alertingRuleVersionHistoryRestore",
-			Description:  "Enables the alert rule version history restore feature",
-			Generate:     Generate{LegacyFrontend: true},
-			Stage:        FeatureStageGeneralAvailability,
-			Owner:        grafanaAlertingSquad,
-			HideFromDocs: true,
-			Expression:   "true", // enabled by default
-		},
-		{
 			Name:         "newShareReportDrawer",
 			Description:  "Enables the report creation drawer in a dashboard",
 			Stage:        FeatureStagePublicPreview,
@@ -1703,14 +1670,6 @@ var (
 		{
 			Name:        "alertingMigrationUI",
 			Description: "Enables the alerting migration UI, to migrate data source-managed rules to Grafana-managed rules",
-			Generate:    Generate{LegacyFrontend: true},
-			Stage:       FeatureStageGeneralAvailability,
-			Owner:       grafanaAlertingSquad,
-			Expression:  "true",
-		},
-		{
-			Name:        "alertingImportYAMLUI",
-			Description: "Enables a UI feature for importing rules from a Prometheus file to Grafana-managed rules",
 			Generate:    Generate{LegacyFrontend: true},
 			Stage:       FeatureStageGeneralAvailability,
 			Owner:       grafanaAlertingSquad,
@@ -1806,15 +1765,6 @@ var (
 			Stage:       FeatureStagePublicPreview,
 			Owner:       grafanaAlertingSquad,
 			Expression:  "false",
-		},
-		{
-			Name:         "alertingBulkActionsInUI",
-			Description:  "Enables the alerting bulk actions in the UI",
-			Generate:     Generate{LegacyFrontend: true},
-			Stage:        FeatureStageGeneralAvailability,
-			Owner:        grafanaAlertingSquad,
-			HideFromDocs: true,
-			Expression:   "true", // enabled by default
 		},
 		{
 			Name:         "kubernetesAuthZResourcePermissionsRedirect",
@@ -2408,14 +2358,6 @@ var (
 			Expression:   "false",
 		},
 		{
-			Name:        "profilesExemplars",
-			Description: "Enables profiles exemplars support in profiles drilldown",
-			Stage:       FeatureStageGeneralAvailability,
-			Owner:       grafanaObservabilityTracesAndProfilingSquad,
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-			Expression:  "true", // enabled by default
-		},
-		{
 			Name:        "pyroscopeUTF8LabelNames",
 			Description: "Enables support for UTF-8 label names in Pyroscope label selectors",
 			Stage:       FeatureStagePublicPreview,
@@ -2814,15 +2756,6 @@ var (
 			Owner:       grafanaObservabilityTracesAndProfilingSquad,
 			Generate:    Generate{LegacyFrontend: true},
 			Expression:  "false",
-		},
-		{
-			Name:         "clearPreviousFieldValues",
-			Description:  "Mitigates React fiber's retention of previous props/state, causing 2x memory use: https://github.com/facebook/react/issues/36176",
-			Stage:        FeatureStageGeneralAvailability,
-			Generate:     Generate{LegacyFrontend: true},
-			Owner:        grafanaDatavizSquad,
-			Expression:   "true",
-			HideFromDocs: true,
 		},
 		{
 			Name:        "enableColorblindSafePanelOptions",

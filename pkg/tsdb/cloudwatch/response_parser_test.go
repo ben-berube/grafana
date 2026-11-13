@@ -1,6 +1,7 @@
 package cloudwatch
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -11,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 	cloudwatchtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
 
-	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/features"
 	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -206,7 +206,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			MetricEditorMode: models.MetricEditorModeBuilder,
 			MatchExact:       true,
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		frame1 := frames[0]
@@ -276,7 +276,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			MetricQueryType:  models.MetricQueryTypeSearch,
 			MetricEditorMode: models.MetricEditorModeBuilder,
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		assert.Equal(t, "some label lb3", frames[0].Name)
@@ -325,7 +325,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			MetricQueryType:  models.MetricQueryTypeSearch,
 			MetricEditorMode: models.MetricEditorModeBuilder,
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		assert.Len(t, frames, 2)
@@ -371,7 +371,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			MetricQueryType:  models.MetricQueryTypeSearch,
 			MetricEditorMode: models.MetricEditorModeBuilder,
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		assert.Len(t, frames, 2)
@@ -419,7 +419,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			MetricQueryType:  models.MetricQueryTypeSearch,
 			MetricEditorMode: models.MetricEditorModeBuilder,
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		assert.Equal(t, "some label", frames[0].Name)
@@ -462,7 +462,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			MetricEditorMode: models.MetricEditorModeBuilder,
 			Label:            "set ${AVG} label",
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		assert.Equal(t, "some label", frames[0].Name)
@@ -505,7 +505,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			MetricEditorMode: models.MetricEditorModeBuilder,
 			Label:            "actual",
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		assert.Equal(t, "actual", frames[0].Name)
@@ -545,7 +545,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			MetricEditorMode: models.MetricEditorModeRaw,
 			Label:            "actual",
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		assert.Equal(t, "actual", frames[0].Name)
@@ -589,7 +589,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			Dimensions:       map[string][]string{"Service": {"EC2", "Elastic Loading Balancing"}, "Resource": {"vCPU", "ApplicationLoadBalancersPerRegion"}},
 			SqlExpression:    "SELECT AVG(ResourceCount) FROM SCHEMA(\"AWS/Usage\", Class, Resource, Service, Type) GROUP BY Service, Resource",
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		assert.Equal(t, "EC2 vCPU", frames[0].Name)
@@ -627,7 +627,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			MetricEditorMode: models.MetricEditorModeBuilder,
 			SqlExpression:    "SELECT AVG(ResourceCount) FROM SCHEMA(\"AWS/Usage\", Class, Resource, Service, Type)",
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		assert.Equal(t, "cloudwatch-default-label", frames[0].Name)
@@ -666,7 +666,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			MetricQueryType:  models.MetricQueryTypeSearch,
 			MetricEditorMode: models.MetricEditorModeRaw,
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		assert.Equal(t, "some label", frames[0].Name)
@@ -712,7 +712,7 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 			MetricQueryType:  models.MetricQueryTypeSearch,
 			MetricEditorMode: models.MetricEditorModeBuilder,
 		}
-		frames, err := buildDataFrames(contextWithFeaturesEnabled(features.FlagCloudWatchNewLabelParsing), *response, query)
+		frames, err := buildDataFrames(context.Background(), *response, query)
 		require.NoError(t, err)
 
 		frame := frames[0]
@@ -724,5 +724,58 @@ func Test_buildDataFrames_parse_label_to_name_and_labels(t *testing.T) {
 		assert.Equal(t, 30.0, frame.Fields[1].At(2).(float64))
 		assert.Equal(t, "Value", frame.Fields[1].Name)
 		assert.Equal(t, "", frame.Fields[1].Config.DisplayName)
+	})
+}
+
+func Test_buildDataFrames_wildcard_dimension_label(t *testing.T) {
+	startTime := time.Now()
+	endTime := startTime.Add(2 * time.Hour)
+	timestamp := time.Now()
+
+	newQuery := func() *models.CloudWatchQuery {
+		return &models.CloudWatchQuery{
+			StartTime:        startTime,
+			EndTime:          endTime,
+			RefId:            "A",
+			Region:           "us-east-1",
+			Namespace:        "AWS/EC2",
+			MetricName:       "CPUUtilization",
+			Dimensions:       map[string][]string{"InstanceId": {"*"}},
+			Statistic:        "Average",
+			Period:           60,
+			MetricQueryType:  models.MetricQueryTypeSearch,
+			MetricEditorMode: models.MetricEditorModeBuilder,
+		}
+	}
+	newResponse := func(label string) models.QueryRowResponse {
+		return models.QueryRowResponse{
+			Metrics: []*cloudwatchtypes.MetricDataResult{
+				{
+					Id:         aws.String("a"),
+					Label:      aws.String(label),
+					Timestamps: []time.Time{timestamp},
+					Values:     []float64{1},
+					StatusCode: cloudwatchtypes.StatusCodeComplete,
+				},
+			},
+		}
+	}
+
+	t.Run("uses the series name when the response label has no dimension separator", func(t *testing.T) {
+		frames, err := buildDataFrames(context.Background(), newResponse("some label"), newQuery())
+		require.NoError(t, err)
+		require.Len(t, frames, 1)
+		assert.Equal(t, "some label", frames[0].Name)
+		assert.Equal(t, "some label", frames[0].Fields[1].Labels["Series"])
+		_, hasInstance := frames[0].Fields[1].Labels["InstanceId"]
+		assert.False(t, hasInstance)
+	})
+
+	t.Run("parses the dimension value from the response label", func(t *testing.T) {
+		frames, err := buildDataFrames(context.Background(), newResponse("some label|&|i-123"), newQuery())
+		require.NoError(t, err)
+		require.Len(t, frames, 1)
+		assert.Equal(t, "some label", frames[0].Name)
+		assert.Equal(t, "i-123", frames[0].Fields[1].Labels["InstanceId"])
 	})
 }

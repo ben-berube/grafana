@@ -275,7 +275,8 @@
       "metadata": {
         "name": "alertingBulkActionsInUI",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2025-04-24T14:49:59Z"
+        "creationTimestamp": "2025-04-24T14:49:59Z",
+        "deletionTimestamp": "2026-11-13T19:12:59Z"
       },
       "spec": {
         "description": "Enables the alerting bulk actions in the UI",
@@ -389,7 +390,8 @@
       "metadata": {
         "name": "alertingImportYAMLUI",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2025-05-21T15:59:41Z"
+        "creationTimestamp": "2025-05-21T15:59:41Z",
+        "deletionTimestamp": "2026-11-13T19:12:59Z"
       },
       "spec": {
         "description": "Enables a UI feature for importing rules from a Prometheus file to Grafana-managed rules",
@@ -699,7 +701,8 @@
       "metadata": {
         "name": "alertingRuleVersionHistoryRestore",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2025-02-17T12:25:32Z"
+        "creationTimestamp": "2025-02-17T12:25:32Z",
+        "deletionTimestamp": "2026-11-13T19:12:59Z"
       },
       "spec": {
         "description": "Enables the alert rule version history restore feature",
@@ -784,7 +787,8 @@
       "metadata": {
         "name": "alertingUIOptimizeReducer",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2024-11-18T10:59:00Z"
+        "creationTimestamp": "2024-11-18T10:59:00Z",
+        "deletionTimestamp": "2026-11-13T19:12:59Z"
       },
       "spec": {
         "description": "Enables removing the reducer from the alerting UI when creating a new alert rule and using instant query",
@@ -1104,7 +1108,8 @@
       "metadata": {
         "name": "azureMonitorPrometheusExemplars",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2024-06-06T16:53:17Z"
+        "creationTimestamp": "2024-06-06T16:53:17Z",
+        "deletionTimestamp": "2026-11-13T19:12:59Z"
       },
       "spec": {
         "description": "Allows configuration of Azure Monitor as a data source that can provide Prometheus exemplars",
@@ -1230,6 +1235,7 @@
         "name": "clearPreviousFieldValues",
         "resourceVersion": "1779387149898",
         "creationTimestamp": "2026-04-01T19:07:25Z",
+        "deletionTimestamp": "2026-11-13T19:12:59Z",
         "annotations": {
           "grafana.app/updatedTimestamp": "2026-05-21 18:12:29.898776 +0000 UTC"
         }
@@ -1302,7 +1308,8 @@
       "metadata": {
         "name": "cloudWatchNewLabelParsing",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2024-04-05T15:57:56Z"
+        "creationTimestamp": "2024-04-05T15:57:56Z",
+        "deletionTimestamp": "2026-11-13T19:12:59Z"
       },
       "spec": {
         "description": "Updates CloudWatch label parsing to be more accurate",
@@ -4401,6 +4408,7 @@
         "name": "profilesExemplars",
         "resourceVersion": "1780997707204",
         "creationTimestamp": "2026-01-07T12:25:42Z",
+        "deletionTimestamp": "2026-11-13T19:12:59Z",
         "annotations": {
           "grafana.app/updatedTimestamp": "2026-06-09 09:35:07.204275 +0000 UTC"
         }

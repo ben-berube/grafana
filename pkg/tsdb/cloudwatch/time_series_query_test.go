@@ -410,8 +410,8 @@ func Test_QueryData_timeSeriesQuery_GetMetricData(t *testing.T) {
 	testCases := map[string]struct {
 		parameters queryParameters
 	}{
-		"should not pass GetMetricData label when query label is empty":        {},
-		"should not pass GetMetricData label when query label is empty string": {parameters: queryParameters{Label: aws.String("")}},
+		"passes generated label when query label is empty":        {},
+		"passes generated label when query label is empty string": {parameters: queryParameters{Label: aws.String("")}},
 	}
 
 	for name, tc := range testCases {
@@ -438,7 +438,8 @@ func Test_QueryData_timeSeriesQuery_GetMetricData(t *testing.T) {
 			getMetricDataInput, ok := api.Calls[0].Arguments.Get(1).(*cloudwatch.GetMetricDataInput)
 			require.True(t, ok)
 			require.Len(t, getMetricDataInput.MetricDataQueries, 1)
-			require.Nil(t, getMetricDataInput.MetricDataQueries[0].Label)
+			require.NotNil(t, getMetricDataInput.MetricDataQueries[0].Label)
+			assert.Equal(t, "${LABEL}", *getMetricDataInput.MetricDataQueries[0].Label)
 		})
 	}
 }

@@ -446,6 +446,12 @@ describe('buildVizPanel', () => {
     expect(viz.state.$timeRange).toBeUndefined();
   });
 
+  it('clears previous field values on the panel', () => {
+    const viz = buildVizPanel(buildPanelWithQueryOptions({}));
+
+    expect(viz.state._UNSAFE_clearPreviousFieldValues).toBe(true);
+  });
+
   it('does not create $timeRange when no time fields are set', () => {
     const viz = buildVizPanel(buildPanelWithQueryOptions({}));
 

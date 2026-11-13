@@ -124,6 +124,7 @@ describe('QueryEditor', () => {
     expect(screen.getByText(/Both/)).toBeDefined();
 
     expect(screen.getByText(/Group by/)).toBeDefined();
+    expect(screen.getByText(/Exemplars/)).toBeDefined();
   });
 
   it('should render correct options outside of explore', async () => {

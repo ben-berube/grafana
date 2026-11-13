@@ -125,24 +125,16 @@ func TestGetDimensionValuesForWildcards(t *testing.T) {
 			assert.Equal(t, []string{"*"}, queries[0].Dimensions["Test_DimensionName1"])
 		})
 
-		t.Run("Should change wildcard dimension value", func(t *testing.T) {
+		t.Run("Should not expand wildcard dimension values for search queries", func(t *testing.T) {
 			query := getBaseQuery()
 			query.MetricName = "Test_MetricName1"
 			query.Dimensions = map[string][]string{"Test_DimensionName1": {"*"}}
 			query.MetricQueryType = models.MetricQueryTypeSearch
 			query.MatchExact = false
-			api := &mocks.MetricsAPI{Metrics: []cloudwatchtypes.Metric{
-				{MetricName: new("Test_MetricName1"), Dimensions: []cloudwatchtypes.Dimension{{Name: new("Test_DimensionName1"), Value: new("Value1")}, {Name: new("Test_DimensionName2"), Value: new("Value2")}}},
-				{MetricName: new("Test_MetricName2"), Dimensions: []cloudwatchtypes.Dimension{{Name: new("Test_DimensionName1"), Value: new("Value3")}}},
-				{MetricName: new("Test_MetricName3"), Dimensions: []cloudwatchtypes.Dimension{{Name: new("Test_DimensionName1"), Value: new("Value4")}}},
-				{MetricName: new("Test_MetricName4"), Dimensions: []cloudwatchtypes.Dimension{{Name: new("Test_DimensionName1"), Value: new("Value2")}}},
-			}}
-			api.On("ListMetrics").Return(nil)
-			queries, err := ds.getDimensionValuesForWildcards(ctx, "us-east-1", api, []*models.CloudWatchQuery{query}, cache.New(0, 0), 50, shouldSkipFetchingWildcards)
+			queries, err := ds.getDimensionValuesForWildcards(ctx, "us-east-1", nil, []*models.CloudWatchQuery{query}, cache.New(0, 0), 50, shouldSkipFetchingWildcards)
 			assert.Nil(t, err)
 			assert.Len(t, queries, 1)
-			assert.Equal(t, map[string][]string{"Test_DimensionName1": {"Value1", "Value2", "Value3", "Value4"}}, queries[0].Dimensions)
-			api.AssertExpectations(t)
+			assert.Equal(t, []string{"*"}, queries[0].Dimensions["Test_DimensionName1"])
 		})
 	})
 
