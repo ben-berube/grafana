@@ -519,11 +519,6 @@ export interface FeatureToggles {
   */
   adHocFilterDefaultValues?: boolean;
   /**
-  * Updates CloudWatch label parsing to be more accurate
-  * @default true
-  */
-  cloudWatchNewLabelParsing?: boolean;
-  /**
   * In server-side expressions, disable the sorting of numeric-kind metrics by their metric name or labels.
   * @default false
   */
@@ -623,11 +618,6 @@ export interface FeatureToggles {
   * @default false
   */
   pluginProxyPreserveTrailingSlash?: boolean;
-  /**
-  * Allows configuration of Azure Monitor as a data source that can provide Prometheus exemplars
-  * @default true
-  */
-  azureMonitorPrometheusExemplars?: boolean;
   /**
   * Enables the gRPC server for authorization
   * @default false
@@ -765,11 +755,6 @@ export interface FeatureToggles {
   */
   crashDetection?: boolean;
   /**
-  * Enables removing the reducer from the alerting UI when creating a new alert rule and using instant query
-  * @default true
-  */
-  alertingUIOptimizeReducer?: boolean;
-  /**
   * Enables user auth for Azure Monitor datasource only
   * @default true
   */
@@ -895,11 +880,6 @@ export interface FeatureToggles {
   */
   scopeSearchAllLevels?: boolean;
   /**
-  * Enables the alert rule version history restore feature
-  * @default true
-  */
-  alertingRuleVersionHistoryRestore?: boolean;
-  /**
   * Enables the report creation drawer in a dashboard
   * @default false
   */
@@ -919,11 +899,6 @@ export interface FeatureToggles {
   * @default true
   */
   alertingMigrationUI?: boolean;
-  /**
-  * Enables a UI feature for importing rules from a Prometheus file to Grafana-managed rules
-  * @default true
-  */
-  alertingImportYAMLUI?: boolean;
   /**
   * Enables the migration wizard UI to migrate alert rules and notification resources from external sources to Grafana Alerting
   * @default false
@@ -979,11 +954,6 @@ export interface FeatureToggles {
   * @default false
   */
   alertingListViewV2PreviewToggle?: boolean;
-  /**
-  * Enables the alerting bulk actions in the UI
-  * @default true
-  */
-  alertingBulkActionsInUI?: boolean;
   /**
   * Redirects the traffic from the legacy resource permissions endpoints to the new K8s AuthZ endpoints
   * @default false
@@ -1306,11 +1276,6 @@ export interface FeatureToggles {
   */
   secretsManagementAppPlatformAwsKeeper?: boolean;
   /**
-  * Enables profiles exemplars support in profiles drilldown
-  * @default true
-  */
-  profilesExemplars?: boolean;
-  /**
   * Use synchronized dispatch timer to minimize duplicate notifications across alertmanager HA pods
   * @default false
   */
@@ -1505,11 +1470,6 @@ export interface FeatureToggles {
   * @default false
   */
   tracesDrilldownTimeSeeker?: boolean;
-  /**
-  * Mitigates React fiber's retention of previous props/state, causing 2x memory use: https://github.com/facebook/react/issues/36176
-  * @default true
-  */
-  clearPreviousFieldValues?: boolean;
   /**
   * Enables new colorblind safe palette and line fill patterns for panels
   * @default false

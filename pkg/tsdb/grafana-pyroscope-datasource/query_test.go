@@ -62,6 +62,16 @@ func Test_query(t *testing.T) {
 		require.Nil(t, resp.Error)
 		require.Equal(t, 1, len(resp.Frames))
 		require.Equal(t, "time", resp.Frames[0].Fields[0].Name)
+		require.Equal(t, typesv1.ExemplarType_EXEMPLAR_TYPE_NONE, client.ExemplarType)
+	})
+
+	t.Run("query metrics requests individual exemplars when the query asks for them", func(t *testing.T) {
+		dataQuery := makeDataQuery()
+		dataQuery.QueryType = queryTypeMetrics
+		dataQuery.JSON = []byte(`{"profileTypeId":"memory:alloc_objects:count:space:bytes","labelSelector":"{app=\\\"baz\\\"}","includeExemplars":true}`)
+		resp := ds.query(context.Background(), pCtx, *dataQuery)
+		require.Nil(t, resp.Error)
+		require.Equal(t, typesv1.ExemplarType_EXEMPLAR_TYPE_INDIVIDUAL, client.ExemplarType)
 	})
 
 	t.Run("query metrics uses min step", func(t *testing.T) {
@@ -594,7 +604,8 @@ func Test_seriesToDataFrame(t *testing.T) {
 }
 
 type FakeClient struct {
-	Args []any
+	Args         []any
+	ExemplarType typesv1.ExemplarType
 }
 
 func (f *FakeClient) ProfileTypes(ctx context.Context, start int64, end int64) ([]*ProfileType, error) {
@@ -652,6 +663,7 @@ func (f *FakeClient) GetSpanProfile(ctx context.Context, profileTypeID, labelSel
 
 func (f *FakeClient) GetSeries(ctx context.Context, profileTypeID, labelSelector string, start, end int64, groupBy []string, limit *int64, step float64, exemplarType typesv1.ExemplarType) (*SeriesResponse, error) {
 	f.Args = []any{profileTypeID, labelSelector, start, end, groupBy, step}
+	f.ExemplarType = exemplarType
 	return &SeriesResponse{
 		Series: []*Series{
 			{

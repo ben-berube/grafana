@@ -12,7 +12,6 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
-	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/features"
 	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/models"
 )
 
@@ -124,8 +123,10 @@ func parseLabels(cloudwatchLabel string, query *models.CloudWatchQuery) (string,
 			continue
 		}
 
-		labels[dim] = splitLabels[labelsIndex]
-		labelsIndex++
+		if labelsIndex < len(splitLabels) {
+			labels[dim] = splitLabels[labelsIndex]
+			labelsIndex++
+		}
 	}
 	return name, labels
 }
@@ -165,7 +166,7 @@ func getLabels(cloudwatchLabel string, query *models.CloudWatchQuery, addSeriesL
 	return labels
 }
 
-func buildDataFrames(ctx context.Context, aggregatedResponse models.QueryRowResponse,
+func buildDataFrames(_ context.Context, aggregatedResponse models.QueryRowResponse,
 	query *models.CloudWatchQuery) (data.Frames, error) {
 	frames := data.Frames{}
 	hasStaticLabel := query.Label != "" && !dynamicLabel.MatchString(query.Label)
@@ -181,9 +182,7 @@ func buildDataFrames(ctx context.Context, aggregatedResponse models.QueryRowResp
 		// In case a multi-valued dimension is used and the cloudwatch query yields no values, create one empty time
 		// series for each dimension value. Use that dimension value to expand the alias field
 		if len(metric.Values) == 0 && query.IsMultiValuedDimensionExpression() {
-			if features.IsEnabled(ctx, features.FlagCloudWatchNewLabelParsing) {
-				label, _, _ = strings.Cut(label, keySeparator)
-			}
+			label, _, _ = strings.Cut(label, keySeparator)
 			series := 0
 			multiValuedDimension := ""
 			for key, values := range query.Dimensions {
@@ -224,10 +223,8 @@ func buildDataFrames(ctx context.Context, aggregatedResponse models.QueryRowResp
 		var labels data.Labels
 		if query.GetGetMetricDataAPIMode() == models.GMDApiModeSQLExpression {
 			labels = getLabels(label, query, true)
-		} else if features.IsEnabled(ctx, features.FlagCloudWatchNewLabelParsing) {
-			name, labels = parseLabels(label, query)
 		} else {
-			labels = getLabels(label, query, false)
+			name, labels = parseLabels(label, query)
 		}
 
 		timeField := data.NewField(data.TimeSeriesTimeFieldName, nil, metric.Timestamps)

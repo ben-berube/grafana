@@ -43,8 +43,7 @@ const (
 	queryTypeMetrics = string(dataquery.PyroscopeQueryTypeMetrics)
 	queryTypeBoth    = string(dataquery.PyroscopeQueryTypeBoth)
 
-	exemplarsFeatureToggle = "profilesExemplars"
-	heatmapFeatureToggle   = "profilesHeatmap"
+	heatmapFeatureToggle = "profilesHeatmap"
 )
 
 var identityTransformation = func(value float64) float64 { return value }
@@ -106,7 +105,7 @@ func (d *PyroscopeDatasource) query(ctx context.Context, pCtx backend.PluginCont
 			}
 
 			exemplarType := typesv1.ExemplarType_EXEMPLAR_TYPE_NONE
-			if qm.IncludeExemplars && config.GrafanaConfigFromContext(ctx).FeatureToggles().IsEnabled(exemplarsFeatureToggle) {
+			if qm.IncludeExemplars {
 				exemplarType = typesv1.ExemplarType_EXEMPLAR_TYPE_INDIVIDUAL
 			}
 			seriesResp, err := d.client.GetSeries(
@@ -229,7 +228,7 @@ func (d *PyroscopeDatasource) queryHeatmap(ctx context.Context, span trace.Span,
 		heatmapType = querierv1.HeatmapQueryType_HEATMAP_QUERY_TYPE_SPAN
 	}
 
-	includeExemplars := qm.IncludeExemplars && config.GrafanaConfigFromContext(ctx).FeatureToggles().IsEnabled(exemplarsFeatureToggle)
+	includeExemplars := qm.IncludeExemplars
 
 	heatmapResp, err := d.client.GetHeatmap(
 		ctx,

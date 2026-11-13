@@ -9,7 +9,6 @@ import (
 const (
 	FlagCloudWatchCrossAccountQuerying = "cloudWatchCrossAccountQuerying"
 	FlagCloudWatchBatchQueries         = "cloudWatchBatchQueries"
-	FlagCloudWatchNewLabelParsing      = "cloudWatchNewLabelParsing"
 	FlagCloudWatchRoundUpEndTime       = "cloudWatchRoundUpEndTime"
 )
 

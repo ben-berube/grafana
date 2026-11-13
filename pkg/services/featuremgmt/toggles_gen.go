@@ -307,10 +307,6 @@ const (
 	// Enables filters and group by variables on all new dashboards. Variables are added only if default data source supports filtering.
 	FlagNewDashboardWithFiltersAndGroupBy = "newDashboardWithFiltersAndGroupBy"
 
-	// FlagCloudWatchNewLabelParsing
-	// Updates CloudWatch label parsing to be more accurate
-	FlagCloudWatchNewLabelParsing = "cloudWatchNewLabelParsing"
-
 	// FlagDisableNumericMetricsSortingInExpressions
 	// In server-side expressions, disable the sorting of numeric-kind metrics by their metric name or labels.
 	FlagDisableNumericMetricsSortingInExpressions = "disableNumericMetricsSortingInExpressions"
@@ -370,10 +366,6 @@ const (
 	// FlagPluginProxyPreserveTrailingSlash
 	// Preserve plugin proxy trailing slash.
 	FlagPluginProxyPreserveTrailingSlash = "pluginProxyPreserveTrailingSlash"
-
-	// FlagAzureMonitorPrometheusExemplars
-	// Allows configuration of Azure Monitor as a data source that can provide Prometheus exemplars
-	FlagAzureMonitorPrometheusExemplars = "azureMonitorPrometheusExemplars"
 
 	// FlagAuthZGRPCServer
 	// Enables the gRPC server for authorization
@@ -745,10 +737,6 @@ const (
 	// FlagSecretsManagementAppPlatformAwsKeeper
 	// Enables the creation of keepers that manage secrets stored on AWS secrets manager
 	FlagSecretsManagementAppPlatformAwsKeeper = "secretsManagementAppPlatformAwsKeeper"
-
-	// FlagProfilesExemplars
-	// Enables profiles exemplars support in profiles drilldown
-	FlagProfilesExemplars = "profilesExemplars"
 
 	// FlagPyroscopeUTF8LabelNames
 	// Enables support for UTF-8 label names in Pyroscope label selectors

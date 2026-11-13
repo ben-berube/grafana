@@ -21,7 +21,6 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
-	"github.com/grafana/grafana-plugin-sdk-go/config"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana/pkg/tsdb/azuremonitor/kinds/dataquery"
 	"github.com/grafana/grafana/pkg/tsdb/azuremonitor/types"
@@ -763,7 +762,7 @@ func Test_executeQueryErrorWithDifferentLogAnalyticsCreds(t *testing.T) {
 	})
 }
 
-func Test_exemplarsFeatureToggle(t *testing.T) {
+func TestBuildQueryTraceExemplar(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -801,9 +800,7 @@ func Test_exemplarsFeatureToggle(t *testing.T) {
 		},
 	}
 
-	t.Run("does not error if feature toggle enabled", func(t *testing.T) {
-		ctx := context.Background()
-		ctx = config.WithGrafanaConfig(ctx, config.NewGrafanaCfg(map[string]string{"GF_INSTANCE_FEATURE_TOGGLES_ENABLE": "azureMonitorPrometheusExemplars"}))
+	t.Run("builds trace exemplar queries without a feature toggle", func(t *testing.T) {
 		query := backend.DataQuery{
 			JSON: []byte(`{
 					"queryType": "traceql",
@@ -816,29 +813,11 @@ func Test_exemplarsFeatureToggle(t *testing.T) {
 			QueryType: string(dataquery.AzureQueryTypeTraceExemplar),
 		}
 
-		_, err := ds.buildQuery(ctx, query, dsInfo, false)
+		built, err := ds.buildQuery(context.Background(), query, dsInfo, false)
 
 		require.NoError(t, err)
-	})
-
-	t.Run("errors if feature toggle disabled", func(t *testing.T) {
-		ctx := context.Background()
-		ctx = config.WithGrafanaConfig(ctx, config.NewGrafanaCfg(map[string]string{"GF_INSTANCE_FEATURE_TOGGLES_ENABLE": ""}))
-		query := backend.DataQuery{
-			JSON: []byte(`{
-					"queryType": "traceql",
-					"azureTraces": {
-						"operationId": "traceid"
-					},
-					"query":     "traceid"
-				}`),
-			RefID:     "A",
-			QueryType: string(dataquery.AzureQueryTypeTraceExemplar),
-		}
-
-		_, err := ds.buildQuery(ctx, query, dsInfo, false)
-
-		require.Error(t, err, "query type unsupported as azureMonitorPrometheusExemplars feature toggle is not enabled")
+		require.NotNil(t, built)
+		require.Equal(t, dataquery.AzureQueryTypeTraceExemplar, built.QueryType)
 	})
 }
 

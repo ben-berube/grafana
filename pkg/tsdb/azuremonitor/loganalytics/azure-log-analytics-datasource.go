@@ -392,13 +392,6 @@ func (e *AzureLogAnalyticsDatasource) buildQuery(ctx context.Context, query back
 	}
 
 	if query.QueryType == string(dataquery.AzureQueryTypeAzureTraces) || query.QueryType == string(dataquery.AzureQueryTypeTraceExemplar) {
-		if query.QueryType == string(dataquery.AzureQueryTypeTraceExemplar) {
-			cfg := config.GrafanaConfigFromContext(ctx)
-			hasPromExemplarsToggle := cfg.FeatureToggles().IsEnabled("azureMonitorPrometheusExemplars")
-			if !hasPromExemplarsToggle {
-				return nil, backend.DownstreamError(fmt.Errorf("query type unsupported as azureMonitorPrometheusExemplars feature toggle is not enabled"))
-			}
-		}
 		azureAppInsightsQuery, err := buildAppInsightsQuery(ctx, query, dsInfo, appInsightsRegExp, e.Logger)
 		if err != nil {
 			errorMessage := fmt.Errorf("failed to build azure application insights query: %w", err)

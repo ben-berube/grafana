@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/clients"
-	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/features"
 	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/models"
 	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/models/resources"
 	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/services"
@@ -13,9 +12,8 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-func shouldSkipFetchingWildcards(ctx context.Context, q *models.CloudWatchQuery) bool {
-	newLabelParsingEnabled := features.IsEnabled(ctx, features.FlagCloudWatchNewLabelParsing)
-	if q.MetricQueryType == models.MetricQueryTypeSearch && (q.MatchExact || newLabelParsingEnabled) {
+func shouldSkipFetchingWildcards(_ context.Context, q *models.CloudWatchQuery) bool {
+	if q.MetricQueryType == models.MetricQueryTypeSearch {
 		return true
 	}
 
