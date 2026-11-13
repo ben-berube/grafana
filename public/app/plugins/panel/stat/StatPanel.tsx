@@ -126,7 +126,7 @@ export const StatPanel = memo(
         replaceVariables,
         theme,
         data: data.series,
-        sparkline: options.graphMode !== BigValueGraphMode.None,
+        sparkline: options.graphMode === BigValueGraphMode.None,
         percentChange: options.showPercentChange,
         timeZone,
       });
