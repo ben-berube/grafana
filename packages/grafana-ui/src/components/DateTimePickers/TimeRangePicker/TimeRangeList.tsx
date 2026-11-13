@@ -62,7 +62,7 @@ const Options = ({ options, value, onChange, title }: Props) => {
             key={keyForOption(option, index)}
             value={option}
             selected={isEqual(option, value)}
-            onSelect={() => onChange(options[index + 1] ?? option)}
+            onSelect={onChange}
             name={title ?? t('time-picker.time-range.default-title', 'Time ranges')}
           />
         ))}

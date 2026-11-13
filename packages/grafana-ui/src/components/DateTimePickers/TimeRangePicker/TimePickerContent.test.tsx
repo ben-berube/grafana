@@ -193,6 +193,30 @@ describe('TimePickerContent', () => {
       expect(screen.queryByText(/Last invalid/i)).not.toBeInTheDocument();
     });
   });
+
+  describe('quick range selection', () => {
+    it('applies the quick range that was clicked', async () => {
+      const user = userEvent.setup();
+      const onChange = jest.fn();
+      renderComponent({
+        value: relativeValue,
+        onChange,
+        quickOptions: [
+          { from: 'now-24h', to: 'now', display: 'Last 24 hours' },
+          { from: 'now-2d', to: 'now', display: 'Last 2 days' },
+        ],
+      });
+
+      await user.click(screen.getByText('Last 24 hours'));
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          raw: { from: 'now-24h', to: 'now' },
+        })
+      );
+    });
+  });
 });
 
 function noop(): {} {
@@ -206,15 +230,17 @@ function renderComponent({
   history = [],
   hideQuickRanges = false,
   hideTimeZone = false,
+  onChange = noop,
+  quickOptions = [
+    { from: 'now-5m', to: 'now', display: 'Last 5 minutes' },
+    { from: 'now-15m', to: 'now', display: 'Last 15 minutes' },
+  ],
 }: Pick<PropsWithScreenSize, 'value'> & Partial<PropsWithScreenSize>): RenderResult {
   return render(
     <TimePickerContentWithScreenSize
       onChangeTimeZone={noop}
-      onChange={noop}
-      quickOptions={[
-        { from: 'now-5m', to: 'now', display: 'Last 5 minutes' },
-        { from: 'now-15m', to: 'now', display: 'Last 15 minutes' },
-      ]}
+      onChange={onChange}
+      quickOptions={quickOptions}
       timeZone="utc"
       value={value}
       isFullscreen={isFullscreen}
