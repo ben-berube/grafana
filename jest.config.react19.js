@@ -2,7 +2,8 @@
 // (including the ones inside node_modules) resolved to the React 19 alias packages.
 // Units migrate onto this runtime one at a time; see scripts/react19/allowlist.json.
 //
-// REACT_RUNTIME=18 keeps React 18, so the same command can compare a unit across both runtimes.
+// REACT_RUNTIME=18 keeps React 18 but still records console output, so a console baseline can
+// be checked against what the same tests already print on React 18.
 const os = require('node:os');
 const path = require('node:path');
 
@@ -25,4 +26,5 @@ module.exports = {
     }),
     ...base.moduleNameMapper,
   },
+  setupFilesAfterEnv: [...base.setupFilesAfterEnv, './public/test/react19/consoleRecorder.ts'],
 };
