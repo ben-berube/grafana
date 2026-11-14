@@ -44,11 +44,6 @@ export interface FeatureToggles {
   */
   canvasPanelNesting?: boolean;
   /**
-  * Enables cross-account querying in CloudWatch datasources
-  * @default true
-  */
-  cloudWatchCrossAccountQuerying?: boolean;
-  /**
   * Rule backtesting API for alerting
   * @default false
   */
@@ -915,11 +910,6 @@ export interface FeatureToggles {
   */
   infinityRunQueriesInParallel?: boolean;
   /**
-  * Enables the alerting migration UI, to migrate data source-managed rules to Grafana-managed rules
-  * @default true
-  */
-  alertingMigrationUI?: boolean;
-  /**
   * Enables a UI feature for importing rules from a Prometheus file to Grafana-managed rules
   * @default true
   */
@@ -1154,11 +1144,6 @@ export interface FeatureToggles {
   * @default false
   */
   graphiteBackendMode?: boolean;
-  /**
-  * Enables the updated Azure Monitor resource picker
-  * @default true
-  */
-  azureResourcePickerUpdates?: boolean;
   /**
   * Checks for deprecated Prometheus authentication methods (SigV4 and Azure), installs the relevant data source, and migrates the Prometheus data sources
   * @deprecated

@@ -23,10 +23,6 @@ const (
 	// Highlight Grafana Enterprise features
 	FlagFeatureHighlights = "featureHighlights"
 
-	// FlagCloudWatchCrossAccountQuerying
-	// Enables cross-account querying in CloudWatch datasources
-	FlagCloudWatchCrossAccountQuerying = "cloudWatchCrossAccountQuerying"
-
 	// FlagAlertingBacktesting
 	// Rule backtesting API for alerting
 	FlagAlertingBacktesting = "alertingBacktesting"

@@ -1,5 +1,5 @@
 import { type DashboardLoadedEvent } from '@grafana/data';
-import { config, reportInteraction } from '@grafana/runtime';
+import { reportInteraction } from '@grafana/runtime';
 
 import {
   type CloudWatchLogsQuery,
@@ -139,9 +139,7 @@ export const onDashboardLoadedHandler = ({
       e.metrics_query_code_count += +Boolean(
         q.metricQueryType === MetricQueryType.Insights && q.metricEditorMode === MetricEditorMode.Code
       );
-      e.metrics_queries_with_account_count += +Boolean(
-        config.featureToggles.cloudWatchCrossAccountQuerying && isMetricSearchBuilder(q) && q.accountId
-      );
+      e.metrics_queries_with_account_count += +Boolean(isMetricSearchBuilder(q) && q.accountId);
     }
 
     reportInteraction('grafana_ds_cloudwatch_dashboard_loaded', e);

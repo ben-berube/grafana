@@ -1,7 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
 
-import { config } from '@grafana/runtime';
-
 import {
   useAccountOptions,
   useDimensionKeys,
@@ -19,15 +17,9 @@ import {
 } from './mocks/CloudWatchDataSource';
 import { setupMockedResourcesAPI } from './mocks/ResourcesAPI';
 
-const originalFeatureToggleValue = config.featureToggles.cloudWatchCrossAccountQuerying;
-
 describe('hooks', () => {
-  afterEach(() => {
-    config.featureToggles.cloudWatchCrossAccountQuerying = originalFeatureToggleValue;
-  });
   describe('useIsMonitoringAccount', () => {
     it('should interpolate variables before calling api', async () => {
-      config.featureToggles.cloudWatchCrossAccountQuerying = true;
       const { api } = setupMockedResourcesAPI({
         variables: [regionVariable],
       });
@@ -105,8 +97,7 @@ describe('hooks', () => {
   });
 
   describe('useAccountOptions', () => {
-    it('does not call the api if the feature toggle is off', async () => {
-      config.featureToggles.cloudWatchCrossAccountQuerying = false;
+    it('loads account options without a feature toggle', async () => {
       const { api } = setupMockedResourcesAPI({
         variables: [regionVariable],
       });
@@ -114,12 +105,12 @@ describe('hooks', () => {
       api.getAccounts = getAccountsMock;
       renderHook(() => useAccountOptions(api, `$${regionVariable.name}`));
       await waitFor(() => {
-        expect(getAccountsMock).toHaveBeenCalledTimes(0);
+        expect(getAccountsMock).toHaveBeenCalledTimes(1);
+        expect(getAccountsMock).toHaveBeenCalledWith({ region: regionVariable.current.value });
       });
     });
 
     it('interpolates region variables before calling the api', async () => {
-      config.featureToggles.cloudWatchCrossAccountQuerying = true;
       const { api } = setupMockedResourcesAPI({
         variables: [regionVariable],
       });
@@ -133,7 +124,6 @@ describe('hooks', () => {
     });
 
     it('returns properly formatted account options, and template variables', async () => {
-      config.featureToggles.cloudWatchCrossAccountQuerying = true;
       const { api } = setupMockedResourcesAPI({
         variables: [regionVariable],
       });

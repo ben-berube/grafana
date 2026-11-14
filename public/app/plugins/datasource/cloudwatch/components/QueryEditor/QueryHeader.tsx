@@ -2,7 +2,6 @@ import type { JSX } from 'react';
 
 import { CoreApp, LoadingState, type QueryEditorProps, type SelectableValue } from '@grafana/data';
 import { EditorHeader, InlineSelect, FlexItem } from '@grafana/plugin-ui';
-import { config } from '@grafana/runtime';
 import { Badge, Button } from '@grafana/ui';
 
 import { type CloudWatchQueryMode } from '../../dataquery.gen';
@@ -48,7 +47,7 @@ const QueryHeader = ({
     }
   };
   const onRegionChange = async (region: string) => {
-    if (config.featureToggles.cloudWatchCrossAccountQuerying && isCloudWatchMetricsQuery(query)) {
+    if (isCloudWatchMetricsQuery(query)) {
       const isMonitoringAccount = await datasource.resources.isMonitoringAccount(region);
       onChange({ ...query, logGroups: [], region, accountId: isMonitoringAccount ? query.accountId : undefined });
     } else {
@@ -56,7 +55,7 @@ const QueryHeader = ({
     }
   };
 
-  const shouldDisplayMonitoringBadge = config.featureToggles.cloudWatchCrossAccountQuerying && isMonitoringAccount;
+  const shouldDisplayMonitoringBadge = isMonitoringAccount;
 
   return (
     <>

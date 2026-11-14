@@ -281,9 +281,7 @@ describe('RuleListActions', () => {
   });
 
   describe('Import Alert Rules', () => {
-    testWithFeatureToggles({ enable: ['alertingMigrationUI'] });
-
-    it('should show "Import alert rules" option when user has required permissions and feature toggle is enabled', async () => {
+    it('should show "Import alert rules" option when user has required permissions', async () => {
       grantUserPermissions([
         AccessControlAction.AlertingRuleRead,
         AccessControlAction.AlertingRuleCreate,
@@ -443,7 +441,7 @@ describe('RuleListActions', () => {
 
   describe('Auto-sync Mimir Alertmanager — disables import menu items', () => {
     testWithFeatureToggles({
-      enable: ['alerting.syncExternalAlertmanager', 'alertingMigrationUI', 'alertingMigrationWizardUI'],
+      enable: ['alerting.syncExternalAlertmanager', 'alertingMigrationWizardUI'],
     });
 
     function mockAdminConfig(uid?: string) {

@@ -59,14 +59,6 @@ var (
 			Expression:  "false",
 		},
 		{
-			Name:        "cloudWatchCrossAccountQuerying",
-			Description: "Enables cross-account querying in CloudWatch datasources",
-			Stage:       FeatureStageGeneralAvailability,
-			Expression:  "true", // enabled by default
-			Owner:       grafanaDataSourcesPlugins,
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
 			Name:        "alertingBacktesting",
 			Description: "Rule backtesting API for alerting",
 			Stage:       FeatureStageExperimental,
@@ -1701,14 +1693,6 @@ var (
 			Expression:  "false",
 		},
 		{
-			Name:        "alertingMigrationUI",
-			Description: "Enables the alerting migration UI, to migrate data source-managed rules to Grafana-managed rules",
-			Generate:    Generate{LegacyFrontend: true},
-			Stage:       FeatureStageGeneralAvailability,
-			Owner:       grafanaAlertingSquad,
-			Expression:  "true",
-		},
-		{
 			Name:        "alertingImportYAMLUI",
 			Description: "Enables a UI feature for importing rules from a Prometheus file to Grafana-managed rules",
 			Generate:    Generate{LegacyFrontend: true},
@@ -2120,14 +2104,6 @@ var (
 			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
 			Owner:       grafanaDataSourcesPlugins,
 			Expression:  "false",
-		},
-		{
-			Name:        "azureResourcePickerUpdates",
-			Description: "Enables the updated Azure Monitor resource picker",
-			Stage:       FeatureStageGeneralAvailability,
-			Generate:    Generate{LegacyFrontend: true},
-			Owner:       grafanaDataSourcesPlugins,
-			Expression:  "true",
 		},
 		{
 			Name:            "prometheusTypeMigration",

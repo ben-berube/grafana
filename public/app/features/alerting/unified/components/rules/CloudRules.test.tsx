@@ -50,8 +50,8 @@ describe('CloudRules — Mimir AM auto-sync gate', () => {
     ]);
   });
 
-  describe('with alertingMigrationUI and alerting.syncExternalAlertmanager enabled', () => {
-    testWithFeatureToggles({ enable: ['alertingMigrationUI', 'alerting.syncExternalAlertmanager'] });
+  describe('with alerting.syncExternalAlertmanager enabled', () => {
+    testWithFeatureToggles({ enable: ['alerting.syncExternalAlertmanager'] });
 
     it('disables the data source import button with a tooltip when Mimir AM auto-sync is configured', async () => {
       setupAdminConfigGet(server, {
@@ -86,8 +86,6 @@ describe('CloudRules — Mimir AM auto-sync gate', () => {
   });
 
   describe('with alerting.syncExternalAlertmanager feature flag off', () => {
-    testWithFeatureToggles({ enable: ['alertingMigrationUI'] });
-
     it('enables the data source import button regardless of admin_config state', async () => {
       renderWithCloudResults();
 
