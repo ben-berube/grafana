@@ -446,7 +446,8 @@
       "metadata": {
         "name": "alertingMigrationUI",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2025-03-14T16:40:05Z"
+        "creationTimestamp": "2025-03-14T16:40:05Z",
+        "deletionTimestamp": "2026-11-14T19:13:26Z"
       },
       "spec": {
         "description": "Enables the alerting migration UI, to migrate data source-managed rules to Grafana-managed rules",
@@ -1289,7 +1290,8 @@
       "metadata": {
         "name": "cloudWatchCrossAccountQuerying",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2022-11-28T11:39:12Z"
+        "creationTimestamp": "2022-11-28T11:39:12Z",
+        "deletionTimestamp": "2026-11-14T19:13:26Z"
       },
       "spec": {
         "description": "Enables cross-account querying in CloudWatch datasources",

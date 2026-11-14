@@ -3,7 +3,6 @@ import * as React from 'react';
 
 import { type QueryEditorProps, type SelectableValue } from '@grafana/data';
 import { EditorField, EditorRow, InlineSelect } from '@grafana/plugin-ui';
-import { config } from '@grafana/runtime';
 import { ConfirmModal, Input, RadioButtonGroup, Space } from '@grafana/ui';
 
 import {
@@ -60,7 +59,7 @@ export const MetricsQueryEditor = (props: Props) => {
   );
 
   const updateAccounIdOnMount = () => {
-    if (config.featureToggles.cloudWatchCrossAccountQuerying && query.accountId) {
+    if (query.accountId) {
       datasource.resources.isMonitoringAccount(query.region).then((isMonitoring) => {
         if (!isMonitoring && query.accountId) {
           onChange({ ...query, accountId: undefined });

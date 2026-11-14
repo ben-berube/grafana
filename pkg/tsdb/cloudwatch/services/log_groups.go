@@ -11,12 +11,11 @@ import (
 )
 
 type LogGroupsService struct {
-	logGroupsAPI          models.CloudWatchLogsAPIProvider
-	isCrossAccountEnabled bool
+	logGroupsAPI models.CloudWatchLogsAPIProvider
 }
 
-var NewLogGroupsService = func(logsClient models.CloudWatchLogsAPIProvider, isCrossAccountEnabled bool) models.LogGroupsProvider {
-	return &LogGroupsService{logGroupsAPI: logsClient, isCrossAccountEnabled: isCrossAccountEnabled}
+var NewLogGroupsService = func(logsClient models.CloudWatchLogsAPIProvider) models.LogGroupsProvider {
+	return &LogGroupsService{logGroupsAPI: logsClient}
 }
 
 func (s *LogGroupsService) GetLogGroups(ctx context.Context, req resources.LogGroupsRequest) ([]resources.ResourceResponse[resources.LogGroup], *string, error) {
@@ -25,7 +24,7 @@ func (s *LogGroupsService) GetLogGroups(ctx context.Context, req resources.LogGr
 		LogGroupNamePrefix: req.LogGroupNamePrefix,
 	}
 
-	if s.isCrossAccountEnabled && req.AccountId != nil {
+	if req.AccountId != nil {
 		input.IncludeLinkedAccounts = aws.Bool(true)
 		if req.LogGroupNamePattern != nil {
 			input.LogGroupNamePrefix = req.LogGroupNamePattern

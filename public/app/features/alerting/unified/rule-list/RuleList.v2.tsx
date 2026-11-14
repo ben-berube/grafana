@@ -67,7 +67,6 @@ export function RuleListActions() {
   const canCreateRules = canCreateGrafanaRules || canCreateCloudRules;
   // Align import UI permission with convert endpoint requirements: rule create + provisioning set status
   const canImportRulesToGMA =
-    config.featureToggles.alertingMigrationUI &&
     contextSrv.hasPermission(AccessControlAction.AlertingRuleCreate) &&
     contextSrv.hasPermission(AccessControlAction.AlertingProvisioningSetStatus);
 

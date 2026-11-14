@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event';
 import { selectOptionInTest } from 'test/helpers/selectOptionInTest';
 
 import { type QueryEditorProps } from '@grafana/data';
-import { config } from '@grafana/runtime';
 
 import { MetricEditorMode, MetricQueryType, LogsQueryLanguage } from '../../dataquery.gen';
 import { type CloudWatchDatasource } from '../../datasource';
@@ -54,9 +53,6 @@ jest.mock('@grafana/runtime', () => ({
   }),
   config: {
     ...jest.requireActual('@grafana/runtime').config,
-    featureToggles: {
-      cloudWatchCrossAccountQuerying: true,
-    },
   },
 }));
 
@@ -169,73 +165,32 @@ describe('QueryEditor should render right editor', () => {
     });
   });
 
-  interface MonitoringBadgeScenario {
-    name: string;
-    query: CloudWatchQuery;
-    toggle: boolean;
-  }
-
   describe('monitoring badge', () => {
-    let originalValue: boolean | undefined;
     let datasourceMock: ReturnType<typeof setupMockedDataSource>;
     beforeEach(() => {
       datasourceMock = setupMockedDataSource();
       datasourceMock.datasource.resources.isMonitoringAccount = jest.fn().mockResolvedValue(true);
       datasourceMock.datasource.resources.getMetrics = jest.fn().mockResolvedValue([]);
       datasourceMock.datasource.resources.getDimensionKeys = jest.fn().mockResolvedValue([]);
-      originalValue = config.featureToggles.cloudWatchCrossAccountQuerying;
-    });
-    afterEach(() => {
-      config.featureToggles.cloudWatchCrossAccountQuerying = originalValue;
     });
 
-    describe('should be displayed when a monitoring account is returned and', () => {
-      const cases: MonitoringBadgeScenario[] = [
-        { name: 'it is logs query and feature is enabled', query: validLogsQuery, toggle: true },
-        {
-          name: 'it is metric search builder query and feature is enabled',
-          query: validMetricSearchBuilderQuery,
-          toggle: true,
-        },
-        {
-          name: 'it is metric search code query and feature is enabled',
-          query: validMetricSearchCodeQuery,
-          toggle: true,
-        },
-      ];
+    const cases: Array<{ name: string; query: CloudWatchQuery }> = [
+      { name: 'logs query', query: validLogsQuery },
+      { name: 'metric search builder query', query: validMetricSearchBuilderQuery },
+      { name: 'metric search code query', query: validMetricSearchCodeQuery },
+      { name: 'metric insights code query', query: validMetricQueryCodeQuery },
+    ];
 
-      test.each(cases)('$name', async ({ query, toggle }) => {
-        config.featureToggles.cloudWatchCrossAccountQuerying = toggle;
-        render(<QueryEditor {...props} datasource={datasourceMock.datasource} query={query} />);
-        expect(await screen.findByText('Monitoring account')).toBeInTheDocument();
-      });
+    test.each(cases)('is displayed for a monitoring account ($name)', async ({ query }) => {
+      render(<QueryEditor {...props} datasource={datasourceMock.datasource} query={query} />);
+      expect(await screen.findByText('Monitoring account')).toBeInTheDocument();
     });
 
-    describe('should not be displayed when a monitoring account is returned and', () => {
-      const cases: MonitoringBadgeScenario[] = [
-        {
-          name: 'it is metric insights code query and toggle is not enabled',
-          query: validMetricQueryCodeQuery,
-          toggle: false,
-        },
-        { name: 'it is logs query and feature is not enabled', query: validLogsQuery, toggle: false },
-        {
-          name: 'it is metric search builder query and feature is not enabled',
-          query: validMetricSearchBuilderQuery,
-          toggle: false,
-        },
-        {
-          name: 'it is metric search code query and feature is not enabled',
-          query: validMetricSearchCodeQuery,
-          toggle: false,
-        },
-      ];
-      test.each(cases)('$name', async ({ query, toggle }) => {
-        config.featureToggles.cloudWatchCrossAccountQuerying = toggle;
-        render(<QueryEditor {...props} datasource={datasourceMock.datasource} query={query} />);
-        expect(await screen.findByText('Run queries')).toBeInTheDocument();
-        expect(screen.queryByText('Monitoring account')).toBeNull();
-      });
+    it('is hidden when the account is not a monitoring account', async () => {
+      datasourceMock.datasource.resources.isMonitoringAccount = jest.fn().mockResolvedValue(false);
+      render(<QueryEditor {...props} datasource={datasourceMock.datasource} query={validLogsQuery} />);
+      expect(await screen.findByText('Run queries')).toBeInTheDocument();
+      expect(screen.queryByText('Monitoring account')).toBeNull();
     });
   });
 
@@ -340,15 +295,7 @@ describe('QueryEditor should render right editor', () => {
   });
 
   describe('metric insights in builder mode', () => {
-    let originalValueCloudWatchCrossAccountQuerying: boolean | undefined;
-    beforeEach(() => {
-      originalValueCloudWatchCrossAccountQuerying = config.featureToggles.cloudWatchCrossAccountQuerying;
-    });
-    afterEach(() => {
-      config.featureToggles.cloudWatchCrossAccountQuerying = originalValueCloudWatchCrossAccountQuerying;
-    });
-    it('should have an account selector when the feature is enabled', async () => {
-      config.featureToggles.cloudWatchCrossAccountQuerying = true;
+    it('shows an account selector', async () => {
       props.datasource.resources.getAccounts = jest.fn().mockResolvedValue(['account123']);
       render(<QueryEditor {...props} query={validMetricQueryBuilderQuery} />);
       await screen.findByText('Metric Insights');

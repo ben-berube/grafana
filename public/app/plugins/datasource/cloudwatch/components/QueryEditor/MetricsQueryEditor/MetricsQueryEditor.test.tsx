@@ -2,7 +2,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import selectEvent from 'react-select-event';
 
 import { type CustomVariableModel, type DataSourceInstanceSettings } from '@grafana/data';
-import type * as runtime from '@grafana/runtime';
 // eslint-disable-next-line no-restricted-imports
 import type * as ui from '@grafana/ui';
 
@@ -18,15 +17,6 @@ jest.mock('@grafana/ui', () => ({
   ...jest.requireActual<typeof ui>('@grafana/ui'),
   CodeEditor: function CodeEditor({ value }: { value: string }) {
     return <pre>{value}</pre>;
-  },
-}));
-
-jest.mock('@grafana/runtime', () => ({
-  ...jest.requireActual<typeof runtime>('@grafana/runtime'),
-  config: {
-    featureToggles: {
-      cloudWatchCrossAccountQuerying: true,
-    },
   },
 }));
 

@@ -2,8 +2,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import selectEvent from 'react-select-event';
 
-import { config } from '@grafana/runtime';
-
 import {
   type CloudWatchMetricsQuery,
   MetricEditorMode,
@@ -66,8 +64,7 @@ describe('Cloudwatch SQLGroupBy', () => {
     });
   });
 
-  it('should show Account ID in groupBy options if cloudWatchCrossAccountQuerying feature flag is enabled', async () => {
-    config.featureToggles.cloudWatchCrossAccountQuerying = true;
+  it('shows Account ID in groupBy options for a monitoring account', async () => {
     baseProps.datasource.resources.isMonitoringAccount = jest.fn().mockResolvedValue(true);
     const query = makeSQLQuery();
 
@@ -79,7 +76,6 @@ describe('Cloudwatch SQLGroupBy', () => {
   });
 
   it('should not show Account ID in groupBy options if not using a monitoring account', async () => {
-    config.featureToggles.cloudWatchCrossAccountQuerying = true;
     baseProps.datasource.resources.isMonitoringAccount = jest.fn().mockResolvedValue(false);
 
     const query = makeSQLQuery();

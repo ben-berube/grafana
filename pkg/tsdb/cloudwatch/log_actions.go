@@ -19,7 +19,6 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/features"
 	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/kinds/dataquery"
 	"github.com/grafana/grafana/pkg/tsdb/cloudwatch/models"
 )
@@ -223,7 +222,7 @@ func (ds *DataSource) executeStartQuery(ctx context.Context, logsClient models.C
 	}
 
 	isMonitoringAccount := false
-	if features.IsEnabled(ctx, features.FlagCloudWatchCrossAccountQuerying) && region != "" {
+	if region != "" {
 		monitoringAccountStatus, err := ds.isMonitoringAccount(ctx, region)
 		if err != nil {
 			ds.logger.FromContext(ctx).Debug("failed to determine monitoring account status", "err", err)
