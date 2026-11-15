@@ -21,7 +21,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/auth"
 	"github.com/grafana/grafana/pkg/services/authn"
 	contextmodel "github.com/grafana/grafana/pkg/services/contexthandler/model"
-	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	loginservice "github.com/grafana/grafana/pkg/services/login"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -148,11 +147,6 @@ func (hs *HTTPServer) LoginView(c *contextmodel.ReqContext) {
 			}
 		}
 
-		if !c.UseSessionStorageRedirect {
-			c.Redirect(hs.GetRedirectURL(c))
-			return
-		}
-
 		c.Redirect(hs.Cfg.AppSubURL + "/")
 		return
 	}
@@ -191,22 +185,12 @@ func (hs *HTTPServer) getAutoLoginRedirectURL(c *contextmodel.ReqContext) string
 
 	for providerName, provider := range oauthInfos {
 		if provider.AutoLogin || hs.Cfg.OAuthAutoLogin {
-			redirectUrl := hs.Cfg.AppSubURL + "/login/" + providerName
-			//nolint:staticcheck // not yet migrated to OpenFeature
-			if hs.Features.IsEnabledGlobally(featuremgmt.FlagUseSessionStorageForRedirection) {
-				redirectUrl += hs.getRedirectToForAutoLogin(c)
-			}
-			return redirectUrl
+			return hs.Cfg.AppSubURL + "/login/" + providerName + hs.getRedirectToForAutoLogin(c)
 		}
 	}
 
 	if samlAutoLogin {
-		redirectUrl := hs.Cfg.AppSubURL + "/login/saml"
-		//nolint:staticcheck // not yet migrated to OpenFeature
-		if hs.Features.IsEnabledGlobally(featuremgmt.FlagUseSessionStorageForRedirection) {
-			redirectUrl += hs.getRedirectToForAutoLogin(c)
-		}
-		return redirectUrl
+		return hs.Cfg.AppSubURL + "/login/saml" + hs.getRedirectToForAutoLogin(c)
 	}
 
 	return ""
@@ -259,7 +243,7 @@ func (hs *HTTPServer) LoginPost(c *contextmodel.ReqContext) response.Response {
 	}
 
 	metrics.MApiLoginPost.Inc()
-	return authn.HandleLoginResponse(c.Req, c.Resp, hs.Cfg, identity, hs.ValidateRedirectTo, hs.Features)
+	return authn.HandleLoginResponse(c.Req, c.Resp, hs.Cfg, identity, hs.ValidateRedirectTo)
 }
 
 func (hs *HTTPServer) loginUserWithUser(user *user.User, c *contextmodel.ReqContext) error {

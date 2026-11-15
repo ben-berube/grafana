@@ -20,7 +20,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/contexthandler"
 	"github.com/grafana/grafana/pkg/services/contexthandler/ctxkey"
 	contextmodel "github.com/grafana/grafana/pkg/services/contexthandler/model"
-	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/org"
 	"github.com/grafana/grafana/pkg/services/pluginsintegration/pluginstore"
 	"github.com/grafana/grafana/pkg/services/user"
@@ -32,7 +31,7 @@ func setupAuthMiddlewareTest(t *testing.T, identity *authn.Identity, authErr err
 	return contexthandler.ProvideService(setting.NewCfg(), &authntest.FakeService{
 		ExpectedErr:      authErr,
 		ExpectedIdentity: identity,
-	}, featuremgmt.WithFeatures())
+	})
 }
 
 func TestAuth_Middleware(t *testing.T) {

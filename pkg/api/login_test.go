@@ -96,15 +96,6 @@ func getBody(resp *httptest.ResponseRecorder) (string, error) {
 	return string(responseData), nil
 }
 
-type redirectCase struct {
-	desc        string
-	url         string
-	status      int
-	appURL      string
-	appSubURL   string
-	redirectURL string
-}
-
 var oAuthInfos = map[string]*social.OAuthInfo{
 	"github": {
 		ClientId:     "fake",
@@ -195,147 +186,28 @@ func TestLoginViewRedirect(t *testing.T) {
 		return response.Empty(http.StatusOK)
 	})
 
-	redirectCases := []redirectCase{
-		{
-			desc:        "grafana relative url without subpath",
-			url:         "/profile",
-			redirectURL: "/profile",
-			appURL:      "http://localhost:3000/",
-			status:      302,
-		},
-		{
-			desc:        "grafana invalid relative url starting with the subpath",
-			url:         "/grafanablah",
-			redirectURL: "/grafana/",
-			appURL:      "http://localhost:3000/",
-			appSubURL:   "/grafana",
-			status:      302,
-		},
-		{
-			desc:        "grafana relative url with subpath with leading slash",
-			url:         "/grafana/profile",
-			redirectURL: "/grafana/profile",
-			appURL:      "http://localhost:3000",
-			appSubURL:   "/grafana",
-			status:      302,
-		},
-		{
-			desc:        "relative url with missing subpath",
-			url:         "/profile",
-			redirectURL: "/grafana/",
-			appURL:      "http://localhost:3000/",
-			appSubURL:   "/grafana",
-			status:      302,
-		},
-		{
-			desc:        "grafana absolute url",
-			url:         "http://localhost:3000/profile",
-			redirectURL: "/",
-			appURL:      "http://localhost:3000/",
-			status:      302,
-		},
-		{
-			desc:        "non grafana absolute url",
-			url:         "http://example.com",
-			redirectURL: "/",
-			appURL:      "http://localhost:3000/",
-			status:      302,
-		},
-		{
-			desc:        "invalid url",
-			url:         ":foo",
-			redirectURL: "/",
-			appURL:      "http://localhost:3000/",
-			status:      302,
-		},
-		{
-			desc:        "non-Grafana URL without scheme",
-			url:         "example.com",
-			redirectURL: "/",
-			appURL:      "http://localhost:3000/",
-			status:      302,
-		},
-		{
-			desc:        "non-Grafana URL without scheme",
-			url:         "www.example.com",
-			redirectURL: "/",
-			appURL:      "http://localhost:3000/",
-			status:      302,
-		},
-		{
-			desc:        "URL path is a host with two leading slashes",
-			url:         "//example.com",
-			redirectURL: "/",
-			appURL:      "http://localhost:3000/",
-			status:      302,
-		},
-		{
-			desc:        "URL path is a host with three leading slashes",
-			url:         "///example.com",
-			redirectURL: "/",
-			appURL:      "http://localhost:3000/",
-			status:      302,
-		},
-		{
-			desc:        "URL path is an IP address with two leading slashes",
-			url:         "//0.0.0.0",
-			redirectURL: "/",
-			appURL:      "http://localhost:3000/",
-			status:      302,
-		},
-		{
-			desc:        "URL path is an IP address with three leading slashes",
-			url:         "///0.0.0.0",
-			redirectURL: "/",
-			appURL:      "http://localhost:3000/",
-			status:      302,
-		},
+	redirectCases := []struct {
+		desc      string
+		appSubURL string
+		want      string
+	}{
+		{desc: "app root", want: "/"},
+		{desc: "app root with subpath", appSubURL: "/grafana", want: "/grafana/"},
 	}
 
 	for _, c := range redirectCases {
-		hs.Cfg.AppURL = c.appURL
 		hs.Cfg.AppSubURL = c.appSubURL
 		t.Run(c.desc, func(t *testing.T) {
-			expCookiePath := "/"
-			if len(hs.Cfg.AppSubURL) > 0 {
-				expCookiePath = hs.Cfg.AppSubURL
-			}
-			cookie := http.Cookie{
-				Name:     "redirect_to",
-				MaxAge:   60,
-				Value:    c.url,
-				HttpOnly: true,
-				Path:     expCookiePath,
-				Secure:   hs.Cfg.CookieSecure,
-				SameSite: hs.Cfg.CookieSameSiteMode,
-			}
 			sc.m.Get(sc.url, sc.defaultHandler)
-			sc.fakeReqNoAssertionsWithCookie("GET", sc.url, cookie).exec()
-			require.Equal(t, c.status, sc.resp.Code)
-			if c.status == 302 {
-				location, ok := sc.resp.Header()["Location"]
-				assert.True(t, ok)
-				assert.Equal(t, c.redirectURL, location[0])
-
-				setCookie, ok := sc.resp.Header()["Set-Cookie"]
-				assert.True(t, ok, "Set-Cookie exists")
-				assert.Greater(t, len(setCookie), 0)
-				var redirectToCookieFound bool
-				redirectToCookieShouldBeDeleted := c.url != c.redirectURL
-				expCookieValue := c.redirectURL
-				expCookieMaxAge := 60
-				if redirectToCookieShouldBeDeleted {
-					expCookieValue = ""
-					expCookieMaxAge = 0
-				}
-				expCookie := fmt.Sprintf("redirect_to=%v; Path=%v; Max-Age=%v; HttpOnly; Secure", expCookieValue, expCookiePath, expCookieMaxAge)
-				for _, cookieValue := range setCookie {
-					if cookieValue == expCookie {
-						redirectToCookieFound = true
-						break
-					}
-				}
-				assert.True(t, redirectToCookieFound)
+			sc.fakeReqNoAssertions("GET", sc.url)
+			sc.req.AddCookie(&http.Cookie{Name: "redirect_to", Value: "/profile"})
+			sc.exec()
+			require.Equal(t, 302, sc.resp.Code)
+			location, ok := sc.resp.Header()["Location"]
+			assert.True(t, ok)
+			assert.Equal(t, c.want, location[0])
+			for _, cookieValue := range sc.resp.Header()["Set-Cookie"] {
+				assert.NotContains(t, cookieValue, "redirect_to=")
 			}
 		})
 	}
@@ -366,133 +238,31 @@ func TestLoginPostRedirect(t *testing.T) {
 		return hs.LoginPost(c)
 	})
 
-	redirectCases := []redirectCase{
-		{
-			desc:        "grafana relative url without subpath",
-			url:         "/profile",
-			redirectURL: "/profile",
-			appURL:      "https://localhost:3000/",
-		},
-		{
-			desc:        "grafana relative url with subpath with leading slash",
-			url:         "/grafana/profile",
-			redirectURL: "/grafana/profile",
-			appURL:      "https://localhost:3000/",
-			appSubURL:   "/grafana",
-		},
-		{
-			desc:        "grafana invalid relative url starting with subpath",
-			url:         "/grafanablah",
-			redirectURL: "/grafana/",
-			appURL:      "https://localhost:3000/",
-			appSubURL:   "/grafana",
-		},
-		{
-			desc:        "relative url with missing subpath",
-			url:         "/profile",
-			redirectURL: "/grafana/",
-			appURL:      "https://localhost:3000/",
-			appSubURL:   "/grafana",
-		},
-		{
-			desc:        "grafana absolute url",
-			url:         "http://localhost:3000/profile",
-			appURL:      "http://localhost:3000/",
-			redirectURL: "/",
-		},
-		{
-			desc:        "non grafana absolute url",
-			url:         "http://example.com",
-			appURL:      "https://localhost:3000/",
-			redirectURL: "/",
-		},
-		{
-			desc:        "invalid URL",
-			url:         ":foo",
-			appURL:      "http://localhost:3000/",
-			redirectURL: "/",
-		},
-		{
-			desc:        "non-Grafana URL without scheme",
-			url:         "example.com",
-			appURL:      "http://localhost:3000/",
-			redirectURL: "/",
-		},
-		{
-			desc:        "non-Grafana URL without scheme",
-			url:         "www.example.com",
-			appURL:      "http://localhost:3000/",
-			redirectURL: "/",
-		},
-		{
-			desc:        "URL path is a host with two leading slashes",
-			url:         "//example.com",
-			appURL:      "http://localhost:3000/",
-			redirectURL: "/",
-		},
-		{
-			desc:        "URL path is a host with three leading slashes",
-			url:         "///example.com",
-			appURL:      "http://localhost:3000/",
-			redirectURL: "/",
-		},
-		{
-			desc:        "URL path is an IP address with two leading slashes",
-			url:         "//0.0.0.0",
-			appURL:      "http://localhost:3000/",
-			redirectURL: "/",
-		},
-		{
-			desc:        "URL path is an IP address with three leading slashes",
-			url:         "///0.0.0.0",
-			appURL:      "http://localhost:3000/",
-			redirectURL: "/",
-		},
+	redirectCases := []struct {
+		desc      string
+		appSubURL string
+		want      string
+	}{
+		{desc: "app root", want: "/"},
+		{desc: "app root with subpath", appSubURL: "/grafana", want: "/grafana/"},
 	}
 
 	for _, c := range redirectCases {
-		hs.Cfg.AppURL = c.appURL
 		hs.Cfg.AppSubURL = c.appSubURL
 
 		t.Run(c.desc, func(t *testing.T) {
-			if c.desc == "grafana invalid relative url starting with subpath" {
-				fmt.Println()
-			}
-			expCookiePath := "/"
-			if len(hs.Cfg.AppSubURL) > 0 {
-				expCookiePath = hs.Cfg.AppSubURL
-			}
-			cookie := http.Cookie{
-				Name:     "redirect_to",
-				MaxAge:   60,
-				Value:    c.url,
-				HttpOnly: true,
-				Path:     expCookiePath,
-				Secure:   hs.Cfg.CookieSecure,
-				SameSite: hs.Cfg.CookieSameSiteMode,
-			}
 			sc.m.Post(sc.url, sc.defaultHandler)
-			sc.fakeReqNoAssertionsWithCookie("POST", sc.url, cookie).exec()
+			sc.fakeReqNoAssertions("POST", sc.url)
+			sc.req.AddCookie(&http.Cookie{Name: "redirect_to", Value: "/profile"})
+			sc.exec()
 			require.Equal(t, 200, sc.resp.Code)
 
 			respJSON, err := simplejson.NewJson(sc.resp.Body.Bytes())
 			require.NoError(t, err)
-			redirectURL := respJSON.Get("redirectUrl").MustString()
-			assert.Equal(t, c.redirectURL, redirectURL)
-
-			// assert redirect_to cookie is deleted
-			setCookie, ok := sc.resp.Header()["Set-Cookie"]
-			assert.True(t, ok, "Set-Cookie exists")
-			assert.Greater(t, len(setCookie), 0)
-			var redirectToCookieFound bool
-			expCookieValue := fmt.Sprintf("redirect_to=; Path=%v; Max-Age=0; HttpOnly; Secure", expCookiePath)
-			for _, cookieValue := range setCookie {
-				if cookieValue == expCookieValue {
-					redirectToCookieFound = true
-					break
-				}
+			assert.Equal(t, c.want, respJSON.Get("redirectUrl").MustString())
+			for _, cookieValue := range sc.resp.Header()["Set-Cookie"] {
+				assert.NotContains(t, cookieValue, "redirect_to=")
 			}
-			assert.True(t, redirectToCookieFound)
 		})
 	}
 }
@@ -536,7 +306,47 @@ func TestLoginOAuthRedirect(t *testing.T) {
 	require.Equal(t, 307, sc.resp.Code)
 	location, ok := sc.resp.Header()["Location"]
 	assert.True(t, ok)
-	assert.Equal(t, "/login/github", location[0])
+	assert.Equal(t, "/login/github?redirectTo=", location[0])
+}
+
+func TestLoginOAuthRedirectKeepsRedirectTo(t *testing.T) {
+	fakeSetIndexViewData(t)
+
+	sc := setupScenarioContext(t, "/login")
+	cfg := setting.NewCfg()
+	mock := &mockSocialService{
+		oAuthInfo: &social.OAuthInfo{
+			ClientId:     "fake",
+			ClientSecret: "fakefake",
+			Enabled:      true,
+			AllowSignup:  true,
+			Name:         "github",
+		},
+		oAuthInfos: oAuthInfos,
+	}
+	promRegister, htmlHandlerRequestsDuration := setupHTMLHandlerMetrics()
+	hs := &HTTPServer{
+		authnService:                &authntest.FakeService{},
+		Cfg:                         cfg,
+		SettingsProvider:            &setting.OSSImpl{Cfg: cfg},
+		License:                     &licensing.OSSLicensingService{},
+		SocialService:               mock,
+		Features:                    featuremgmt.WithFeatures(),
+		promRegister:                promRegister,
+		htmlHandlerRequestsDuration: htmlHandlerRequestsDuration,
+	}
+
+	sc.defaultHandler = routing.Wrap(func(c *contextmodel.ReqContext) response.Response {
+		hs.LoginView(c)
+		return response.Empty(http.StatusOK)
+	})
+
+	hs.Cfg.OAuthAutoLogin = true
+	sc.m.Get(sc.url, sc.defaultHandler)
+	sc.fakeReqWithParams("GET", sc.url, map[string]string{"redirectTo": "/d/abc"}).exec()
+
+	require.Equal(t, 307, sc.resp.Code)
+	assert.Equal(t, "/login/github?redirectTo=%2Fd%2Fabc", sc.resp.Header().Get("Location"))
 }
 
 func TestLoginInternal(t *testing.T) {

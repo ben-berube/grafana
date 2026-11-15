@@ -13,7 +13,6 @@ import (
 	"github.com/grafana/grafana/pkg/models/usertoken"
 	"github.com/grafana/grafana/pkg/services/authn"
 	"github.com/grafana/grafana/pkg/services/authn/authntest"
-	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/secrets/fakes"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -83,25 +82,26 @@ func TestOAuthLogin_Redirect(t *testing.T) {
 				// check that we get correct redirect url
 				assert.Equal(t, tt.expectedRedirect.URL, res.Header.Get("Location"))
 
-				require.GreaterOrEqual(t, len(res.Cookies()), 1)
-				if tt.expectedRedirect.Extra[authn.KeyOAuthPKCE] != "" {
-					require.Len(t, res.Cookies(), 2)
-				} else {
-					require.Len(t, res.Cookies(), 1)
+				cookiesByName := map[string]*http.Cookie{}
+				for _, c := range res.Cookies() {
+					cookiesByName[c.Name] = c
 				}
 
-				require.GreaterOrEqual(t, len(res.Cookies()), 1)
-				stateCookie := res.Cookies()[0]
-				assert.Equal(t, OauthStateCookieName, stateCookie.Name)
+				stateCookie := cookiesByName[OauthStateCookieName]
+				require.NotNil(t, stateCookie)
 				assert.Equal(t, tt.expectedRedirect.Extra[authn.KeyOAuthState], stateCookie.Value)
 
+				redirectCookie := cookiesByName["redirectTo"]
+				require.NotNil(t, redirectCookie)
+				assert.Empty(t, redirectCookie.Value)
+
 				if tt.expectedRedirect.Extra[authn.KeyOAuthPKCE] != "" {
-					require.Len(t, res.Cookies(), 2)
-					pkceCookie := res.Cookies()[1]
-					assert.Equal(t, OauthPKCECookieName, pkceCookie.Name)
+					require.Len(t, res.Cookies(), 3)
+					pkceCookie := cookiesByName[OauthPKCECookieName]
+					require.NotNil(t, pkceCookie)
 					assert.Equal(t, tt.expectedRedirect.Extra[authn.KeyOAuthPKCE], pkceCookie.Value)
 				} else {
-					require.Len(t, res.Cookies(), 1)
+					require.Len(t, res.Cookies(), 2)
 				}
 
 				require.NoError(t, res.Body.Close())
@@ -184,6 +184,58 @@ func TestOAuthLogin_AuthorizationCode(t *testing.T) {
 	}
 }
 
+func TestOAuthLogin_AuthorizationCodeUsesRedirectToCookie(t *testing.T) {
+	server := SetupAPITestServer(t, func(hs *HTTPServer) {
+		cfg := setting.NewCfg()
+		hs.Cfg = cfg
+		hs.Cfg.LoginCookieName = "some_name"
+		hs.SecretsService = fakes.NewFakeSecretsService()
+		hs.authnService = &authntest.FakeService{
+			ExpectedIdentity: &authn.Identity{
+				SessionToken: &usertoken.UserToken{UnhashedToken: "some-token"},
+			},
+		}
+	})
+	server.HttpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
+
+	t.Run("follows a same-app redirectTo cookie", func(t *testing.T) {
+		req := server.NewGetRequest("/login/generic_oauth?code=code")
+		req.AddCookie(&http.Cookie{Name: "redirectTo", Value: url.QueryEscape("/d/abc")})
+		res, err := server.Send(req)
+		require.NoError(t, err)
+		t.Cleanup(func() { require.NoError(t, res.Body.Close()) })
+
+		assert.Equal(t, http.StatusFound, res.StatusCode)
+		assert.Equal(t, "/d/abc", res.Header.Get("Location"))
+		assertRedirectToCookieCleared(t, res)
+	})
+
+	t.Run("ignores an external redirectTo cookie", func(t *testing.T) {
+		req := server.NewGetRequest("/login/generic_oauth?code=code")
+		req.AddCookie(&http.Cookie{Name: "redirectTo", Value: url.QueryEscape("https://evil.example/phish")})
+		res, err := server.Send(req)
+		require.NoError(t, err)
+		t.Cleanup(func() { require.NoError(t, res.Body.Close()) })
+
+		assert.Equal(t, http.StatusFound, res.StatusCode)
+		assert.Equal(t, "/", res.Header.Get("Location"))
+		assertRedirectToCookieCleared(t, res)
+	})
+}
+
+func assertRedirectToCookieCleared(t *testing.T, res *http.Response) {
+	t.Helper()
+	for _, c := range res.Cookies() {
+		if c.Name == "redirectTo" {
+			assert.Equal(t, -1, c.MaxAge)
+			return
+		}
+	}
+	t.Fatal("expected redirectTo cookie to be cleared")
+}
+
 func TestOAuthLogin_Error(t *testing.T) {
 	server := SetupAPITestServer(t, func(hs *HTTPServer) {
 		hs.Cfg = setting.NewCfg()
@@ -225,7 +277,6 @@ func TestOAuthLogin_RedirectToCookiePreservesEncodedCharacters(t *testing.T) {
 			server := SetupAPITestServer(t, func(hs *HTTPServer) {
 				hs.Cfg = setting.NewCfg()
 				hs.SecretsService = fakes.NewFakeSecretsService()
-				hs.Features = featuremgmt.WithFeatures(featuremgmt.FlagUseSessionStorageForRedirection)
 				hs.authnService = &authntest.FakeService{
 					ExpectedRedirect: &authn.Redirect{
 						URL: "https://oauth-provider.example.com/authorize",
