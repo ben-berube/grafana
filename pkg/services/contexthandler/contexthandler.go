@@ -14,7 +14,6 @@ import (
 	"github.com/open-feature/go-sdk/openfeature"
 
 	authnClients "github.com/grafana/grafana/pkg/services/authn/clients"
-	"github.com/grafana/grafana/pkg/services/featuremgmt"
 
 	"github.com/grafana/grafana/pkg/api/response"
 	"github.com/grafana/grafana/pkg/apimachinery/identity"
@@ -29,12 +28,10 @@ import (
 	"github.com/grafana/grafana/pkg/web"
 )
 
-func ProvideService(cfg *setting.Cfg, authenticator authn.Authenticator, features featuremgmt.FeatureToggles,
-) *ContextHandler {
+func ProvideService(cfg *setting.Cfg, authenticator authn.Authenticator) *ContextHandler {
 	return &ContextHandler{
 		cfg:           cfg,
 		authenticator: authenticator,
-		features:      features,
 	}
 }
 
@@ -42,7 +39,6 @@ func ProvideService(cfg *setting.Cfg, authenticator authn.Authenticator, feature
 type ContextHandler struct {
 	cfg           *setting.Cfg
 	authenticator authn.Authenticator
-	features      featuremgmt.FeatureToggles
 }
 
 type reqContextKey = ctxkey.Key
@@ -104,17 +100,15 @@ func (h *ContextHandler) setRequestContext(ctx context.Context) context.Context 
 	ctx, span := tracing.Start(ctx, "ContextHandler.setRequestContext")
 	defer span.End()
 
-	//nolint:staticcheck // not yet migrated to OpenFeature
 	reqContext := &contextmodel.ReqContext{
 		Context: web.FromContext(ctx),
 		SignedInUser: &user.SignedInUser{
 			Permissions: map[int64]map[string][]string{},
 		},
-		IsSignedIn:                false,
-		AllowAnonymous:            false,
-		SkipDSCache:               false,
-		Logger:                    log.New("context"),
-		UseSessionStorageRedirect: h.features.IsEnabledGlobally(featuremgmt.FlagUseSessionStorageForRedirection),
+		IsSignedIn:     false,
+		AllowAnonymous: false,
+		SkipDSCache:    false,
+		Logger:         log.New("context"),
 	}
 
 	// inject ReqContext in the context

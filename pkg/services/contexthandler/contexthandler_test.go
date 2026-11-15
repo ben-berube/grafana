@@ -17,7 +17,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/authn/authntest"
 	"github.com/grafana/grafana/pkg/services/contexthandler"
 	contextmodel "github.com/grafana/grafana/pkg/services/contexthandler/model"
-	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/login"
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/setting"
@@ -29,7 +28,6 @@ func TestContextHandler(t *testing.T) {
 		handler := contexthandler.ProvideService(
 			setting.NewCfg(),
 			&authntest.FakeService{ExpectedErr: errors.New("some error")},
-			featuremgmt.WithFeatures(),
 		)
 
 		server := webtest.NewServer(t, routing.NewRouteRegister())
@@ -50,7 +48,6 @@ func TestContextHandler(t *testing.T) {
 		handler := contexthandler.ProvideService(
 			setting.NewCfg(),
 			&authntest.FakeService{ExpectedIdentity: id},
-			featuremgmt.WithFeatures(),
 		)
 
 		server := webtest.NewServer(t, routing.NewRouteRegister())
@@ -75,7 +72,6 @@ func TestContextHandler(t *testing.T) {
 		handler := contexthandler.ProvideService(
 			setting.NewCfg(),
 			&authntest.FakeService{ExpectedIdentity: identity},
-			featuremgmt.WithFeatures(),
 		)
 
 		server := webtest.NewServer(t, routing.NewRouteRegister())
@@ -96,7 +92,6 @@ func TestContextHandler(t *testing.T) {
 		handler := contexthandler.ProvideService(
 			setting.NewCfg(),
 			&authntest.FakeService{ExpectedIdentity: identity},
-			featuremgmt.WithFeatures(),
 		)
 
 		server := webtest.NewServer(t, routing.NewRouteRegister())
@@ -126,7 +121,6 @@ func TestContextHandler(t *testing.T) {
 		handler := contexthandler.ProvideService(
 			cfg,
 			&authntest.FakeService{ExpectedIdentity: &authn.Identity{}},
-			featuremgmt.WithFeatures(),
 		)
 
 		server := webtest.NewServer(t, routing.NewRouteRegister())
@@ -154,7 +148,6 @@ func TestContextHandler(t *testing.T) {
 			handler := contexthandler.ProvideService(
 				cfg,
 				&authntest.FakeService{ExpectedIdentity: &authn.Identity{ID: i, Type: typ}},
-				featuremgmt.WithFeatures(),
 			)
 
 			server := webtest.NewServer(t, routing.NewRouteRegister())
@@ -216,7 +209,6 @@ func TestContextHandler(t *testing.T) {
 		handler := contexthandler.ProvideService(
 			setting.NewCfg(),
 			&authntest.FakeService{ExpectedErr: errors.New("some error")},
-			featuremgmt.WithFeatures(),
 		)
 
 		server := webtest.NewServer(t, routing.NewRouteRegister())
@@ -242,7 +234,6 @@ func TestContextHandler(t *testing.T) {
 					Namespace: "org-3",
 				},
 			},
-			featuremgmt.WithFeatures(),
 		)
 
 		server := webtest.NewServer(t, routing.NewRouteRegister())

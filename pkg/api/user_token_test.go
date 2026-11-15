@@ -21,7 +21,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/user"
 	"github.com/grafana/grafana/pkg/services/user/usertest"
 	"github.com/grafana/grafana/pkg/setting"
-	"github.com/grafana/grafana/pkg/web/webtest"
 )
 
 func TestUserTokenAPIEndpoint(t *testing.T) {
@@ -173,71 +172,47 @@ func TestHTTPServer_RotateUserAuthTokenRedirect(t *testing.T) {
 		{"parent directory", "/../", "/"},
 	}
 
-	sessionTestCases := []struct {
-		name                      string
-		useSessionStorageRedirect bool
-	}{
-		{"when useSessionStorageRedirect is enabled", true},
-		{"when useSessionStorageRedirect is disabled", false},
-	}
+	for _, redirectCase := range redirectTestCases {
+		t.Run(redirectCase.name, func(t *testing.T) {
+			server := SetupAPITestServer(t, func(hs *HTTPServer) {
+				cfg := setting.NewCfg()
+				cfg.LoginCookieName = "grafana_session"
+				cfg.LoginMaxLifetime = 10 * time.Hour
+				hs.Cfg = cfg
+				hs.log = log.New()
+				hs.AuthTokenService = &authtest.FakeUserAuthTokenService{
+					RotateTokenProvider: func(ctx context.Context, cmd auth.RotateCommand) (*auth.UserToken, error) {
+						return &auth.UserToken{UnhashedToken: "new"}, nil
+					},
+				}
+			})
 
-	for _, sessionCase := range sessionTestCases {
-		t.Run(sessionCase.name, func(t *testing.T) {
-			for _, redirectCase := range redirectTestCases {
-				t.Run(redirectCase.name, func(t *testing.T) {
-					server := SetupAPITestServer(t, func(hs *HTTPServer) {
-						cfg := setting.NewCfg()
-						cfg.LoginCookieName = "grafana_session"
-						cfg.LoginMaxLifetime = 10 * time.Hour
-						hs.Cfg = cfg
-						hs.log = log.New()
-						hs.AuthTokenService = &authtest.FakeUserAuthTokenService{
-							RotateTokenProvider: func(ctx context.Context, cmd auth.RotateCommand) (*auth.UserToken, error) {
-								return &auth.UserToken{UnhashedToken: "new"}, nil
-							},
-						}
-					})
+			redirectToQuery := url.QueryEscape(redirectCase.redirectUrl)
+			req := server.NewGetRequest("/user/auth-tokens/rotate?redirectTo=" + redirectToQuery)
+			req.AddCookie(&http.Cookie{Name: "grafana_session", Value: "123", Path: "/"})
 
-					redirectToQuery := url.QueryEscape(redirectCase.redirectUrl)
-					urlString := "/user/auth-tokens/rotate"
+			var redirectStatusCode int
+			var redirectLocation string
 
-					if sessionCase.useSessionStorageRedirect {
-						urlString = urlString + "?redirectTo=" + redirectToQuery
-					}
+			server.HttpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+				if len(via) > 1 {
+					// Stop after first redirect
+					return http.ErrUseLastResponse
+				}
 
-					req := server.NewGetRequest(urlString)
-					req.AddCookie(&http.Cookie{Name: "grafana_session", Value: "123", Path: "/"})
-
-					if sessionCase.useSessionStorageRedirect {
-						req = webtest.RequestWithWebContext(req, &contextmodel.ReqContext{UseSessionStorageRedirect: true})
-					} else {
-						req.AddCookie(&http.Cookie{Name: "redirect_to", Value: redirectToQuery, Path: "/"})
-					}
-
-					var redirectStatusCode int
-					var redirectLocation string
-
-					server.HttpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-						if len(via) > 1 {
-							// Stop after first redirect
-							return http.ErrUseLastResponse
-						}
-
-						if req.Response == nil {
-							return nil
-						}
-						redirectStatusCode = req.Response.StatusCode
-						redirectLocation = req.Response.Header.Get("Location")
-						return nil
-					}
-					res, err := server.Send(req)
-					require.NoError(t, err)
-					assert.Equal(t, 302, redirectStatusCode)
-					assert.Equal(t, redirectCase.expectedUrl, redirectLocation, "redirectTo=%s", redirectCase.redirectUrl)
-
-					require.NoError(t, res.Body.Close())
-				})
+				if req.Response == nil {
+					return nil
+				}
+				redirectStatusCode = req.Response.StatusCode
+				redirectLocation = req.Response.Header.Get("Location")
+				return nil
 			}
+			res, err := server.Send(req)
+			require.NoError(t, err)
+			assert.Equal(t, 302, redirectStatusCode)
+			assert.Equal(t, redirectCase.expectedUrl, redirectLocation, "redirectTo=%s", redirectCase.redirectUrl)
+
+			require.NoError(t, res.Body.Close())
 		})
 	}
 }
