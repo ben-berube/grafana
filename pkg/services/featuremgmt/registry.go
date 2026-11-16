@@ -1368,14 +1368,6 @@ var (
 			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
 		},
 		{
-			Name:        "pluginsSriChecks",
-			Description: "Enables SRI checks for plugin assets",
-			Stage:       FeatureStageGeneralAvailability,
-			Owner:       grafanaCatalogSquad,
-			Expression:  "false", // disabled by default
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
 			Name:        "timeRangeProvider",
 			Description: "Enables time pickers sync",
 			Stage:       FeatureStageExperimental,
@@ -1733,15 +1725,6 @@ var (
 			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
 		},
 		{
-			Name:         "alertingRulePermanentlyDelete",
-			Description:  "Enables UI functionality to permanently delete alert rules",
-			Generate:     Generate{LegacyFrontend: true},
-			Stage:        FeatureStageGeneralAvailability,
-			Owner:        grafanaAlertingSquad,
-			HideFromDocs: true,
-			Expression:   "true", // enabled by default
-		},
-		{
 			Name:         "alertingRuleRecoverDeleted",
 			Description:  "Enables the UI functionality to recover and view deleted alert rules",
 			Generate:     Generate{LegacyGo: true, LegacyFrontend: true}, // changes navtree from the backend
@@ -2053,15 +2036,6 @@ var (
 			HideFromDocs: true,
 			Expression:   "false",
 			Generate:     Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
-			Name:         "restrictedPluginApis",
-			Description:  "Enables sharing a list of APIs with a list of plugins",
-			Stage:        FeatureStageGeneralAvailability,
-			Owner:        grafanaCatalogSquad,
-			HideFromDocs: true,
-			Generate:     Generate{LegacyFrontend: true},
-			Expression:   "true",
 		},
 		{
 			Name:        "favoriteDatasources",
