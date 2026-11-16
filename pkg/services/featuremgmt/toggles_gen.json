@@ -670,7 +670,8 @@
       "metadata": {
         "name": "alertingRulePermanentlyDelete",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2025-04-03T11:18:25Z"
+        "creationTimestamp": "2025-04-03T11:18:25Z",
+        "deletionTimestamp": "2026-11-16T19:15:39Z"
       },
       "spec": {
         "description": "Enables UI functionality to permanently delete alert rules",
@@ -4332,7 +4333,8 @@
       "metadata": {
         "name": "pluginsSriChecks",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2024-10-04T12:55:09Z"
+        "creationTimestamp": "2024-10-04T12:55:09Z",
+        "deletionTimestamp": "2026-11-16T19:15:39Z"
       },
       "spec": {
         "description": "Enables SRI checks for plugin assets",

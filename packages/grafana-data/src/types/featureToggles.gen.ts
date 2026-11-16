@@ -725,11 +725,6 @@ export interface FeatureToggles {
   */
   rolePickerDrawer?: boolean;
   /**
-  * Enables SRI checks for plugin assets
-  * @default false
-  */
-  pluginsSriChecks?: boolean;
-  /**
   * Enables time pickers sync
   * @default false
   */
@@ -935,11 +930,6 @@ export interface FeatureToggles {
   */
   azureMonitorLogsBuilderEditor?: boolean;
   /**
-  * Enables UI functionality to permanently delete alert rules
-  * @default true
-  */
-  alertingRulePermanentlyDelete?: boolean;
-  /**
   * Enables the UI functionality to recover and view deleted alert rules
   * @default true
   */
@@ -1119,11 +1109,6 @@ export interface FeatureToggles {
   * @default false
   */
   alertmanagerRemoteSecondaryWithRemoteState?: boolean;
-  /**
-  * Enables sharing a list of APIs with a list of plugins
-  * @default true
-  */
-  restrictedPluginApis?: boolean;
   /**
   * Enable favorite datasources
   * @default false

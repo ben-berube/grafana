@@ -23,7 +23,6 @@ func Test_ModuleHash(t *testing.T) {
 	)
 	for _, tc := range []struct {
 		name     string
-		features *config.Features
 		registry []*plugins.Plugin
 
 		// Can be used to configure plugin's fs
@@ -40,7 +39,6 @@ func Test_ModuleHash(t *testing.T) {
 			plugin:        pluginID,
 			registry:      []*plugins.Plugin{newPlugin(pluginID, withSignatureStatus(plugins.SignatureStatusUnsigned))},
 			cdn:           false,
-			features:      &config.Features{SriChecksEnabled: false},
 			expModuleHash: "",
 		},
 		{
@@ -52,33 +50,10 @@ func Test_ModuleHash(t *testing.T) {
 				withClass(plugins.ClassExternal),
 			)},
 			cdn:           true,
-			features:      &config.Features{SriChecksEnabled: true},
 			expModuleHash: newSRIHash(t, "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"),
 		},
 		{
-			plugin: pluginID,
-			registry: []*plugins.Plugin{newPlugin(
-				pluginID,
-				withSignatureStatus(plugins.SignatureStatusValid),
-				withFS(plugins.NewLocalFS(filepath.Join("../testdata", "module-hash-valid"))),
-				withClass(plugins.ClassExternal),
-			)},
-			cdn:           true,
-			features:      &config.Features{SriChecksEnabled: true},
-			expModuleHash: newSRIHash(t, "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"),
-		},
-		{
-			plugin: pluginID,
-			registry: []*plugins.Plugin{newPlugin(
-				pluginID,
-				withSignatureStatus(plugins.SignatureStatusValid),
-				withFS(plugins.NewLocalFS(filepath.Join("../testdata", "module-hash-valid"))),
-			)},
-			cdn:           false,
-			features:      &config.Features{SriChecksEnabled: true},
-			expModuleHash: "",
-		},
-		{
+			name:   "signed plugin served from the CDN returns a module hash",
 			plugin: pluginID,
 			registry: []*plugins.Plugin{newPlugin(
 				pluginID,
@@ -86,10 +61,10 @@ func Test_ModuleHash(t *testing.T) {
 				withFS(plugins.NewLocalFS(filepath.Join("../testdata", "module-hash-valid"))),
 			)},
 			cdn:           true,
-			features:      &config.Features{SriChecksEnabled: false},
-			expModuleHash: "",
+			expModuleHash: newSRIHash(t, "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03"),
 		},
 		{
+			name:   "signed plugin that is not served from the CDN does not return a module hash",
 			plugin: pluginID,
 			registry: []*plugins.Plugin{newPlugin(
 				pluginID,
@@ -97,7 +72,6 @@ func Test_ModuleHash(t *testing.T) {
 				withFS(plugins.NewLocalFS(filepath.Join("../testdata", "module-hash-valid"))),
 			)},
 			cdn:           false,
-			features:      &config.Features{SriChecksEnabled: false},
 			expModuleHash: "",
 		},
 		{
@@ -118,7 +92,6 @@ func Test_ModuleHash(t *testing.T) {
 				),
 			},
 			cdn:           true,
-			features:      &config.Features{SriChecksEnabled: true},
 			expModuleHash: newSRIHash(t, "04d70db091d96c4775fb32ba5a8f84cc22893eb43afdb649726661d4425c6711"),
 		},
 		{
@@ -139,7 +112,6 @@ func Test_ModuleHash(t *testing.T) {
 				),
 			},
 			cdn:           true,
-			features:      &config.Features{SriChecksEnabled: true},
 			expModuleHash: newSRIHash(t, "cbd1ac2284645a0e1e9a8722a729f5bcdd2b831222728709c6360beecdd6143f"),
 		},
 		{
@@ -167,7 +139,6 @@ func Test_ModuleHash(t *testing.T) {
 			},
 			plugin:        "child-panel",
 			cdn:           true,
-			features:      &config.Features{SriChecksEnabled: true},
 			expModuleHash: newSRIHash(t, "cbd1ac2284645a0e1e9a8722a729f5bcdd2b831222728709c6360beecdd6143f"),
 		},
 		{
@@ -184,7 +155,6 @@ func Test_ModuleHash(t *testing.T) {
 				)),
 			)},
 			cdn:           false,
-			features:      &config.Features{SriChecksEnabled: true},
 			expModuleHash: "",
 		},
 		{
@@ -196,7 +166,6 @@ func Test_ModuleHash(t *testing.T) {
 				withFS(plugins.NewLocalFS(filepath.Join("../testdata", "module-hash-no-module-js"))),
 			)},
 			cdn:           false,
-			features:      &config.Features{SriChecksEnabled: true},
 			expModuleHash: "",
 		},
 		{
@@ -208,7 +177,6 @@ func Test_ModuleHash(t *testing.T) {
 				withFS(plugins.NewLocalFS(filepath.Join("../testdata", "module-hash-no-manifest-txt"))),
 			)},
 			cdn:           false,
-			features:      &config.Features{SriChecksEnabled: true},
 			expModuleHash: "",
 		},
 	} {
@@ -219,7 +187,7 @@ func Test_ModuleHash(t *testing.T) {
 			} else {
 				expS = "should return module hash"
 			}
-			tc.name = fmt.Sprintf("feature=%v, cdn_config=%v %s", tc.features.SriChecksEnabled, tc.cdn, expS)
+			tc.name = fmt.Sprintf("cdn_config=%v %s", tc.cdn, expS)
 		}
 
 		t.Run(tc.name, func(t *testing.T) {
@@ -237,14 +205,9 @@ func Test_ModuleHash(t *testing.T) {
 					},
 				}
 			}
-			features := tc.features
-			if features == nil {
-				features = &config.Features{}
-			}
 			pCfg := &config.PluginManagementCfg{
 				PluginsCDNURLTemplate: "http://cdn.example.com",
 				PluginSettings:        pluginSettings,
-				Features:              *features,
 			}
 
 			svc := NewCalculator(
@@ -262,7 +225,6 @@ func Test_ModuleHash(t *testing.T) {
 func Test_ModuleHash_Cache(t *testing.T) {
 	pCfg := &config.PluginManagementCfg{
 		PluginSettings: config.PluginSettings{},
-		Features:       config.Features{SriChecksEnabled: true},
 	}
 	svc := NewCalculator(
 		pCfg,
@@ -302,7 +264,6 @@ func Test_ModuleHash_Cache(t *testing.T) {
 					"cdn": "true",
 				},
 			},
-			Features: config.Features{SriChecksEnabled: true},
 		}
 		reg := newPluginRegistry(t, pV1)
 		svc = NewCalculator(

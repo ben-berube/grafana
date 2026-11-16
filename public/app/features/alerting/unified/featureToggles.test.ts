@@ -1,8 +1,9 @@
 import { config } from '@grafana/runtime';
 
-import { shouldUseAlertingListViewV2 } from './featureToggles';
+import { shouldAllowPermanentlyDeletingRules, shouldUseAlertingListViewV2 } from './featureToggles';
 import { mockLocalStorage } from './mocks';
 import { setPreviewToggle } from './previewToggles';
+import * as misc from './utils/misc';
 
 const localStorageMock = mockLocalStorage();
 
@@ -61,6 +62,36 @@ describe('featureToggles', () => {
 
         expect(shouldUseAlertingListViewV2()).toBe(false);
       });
+    });
+  });
+
+  describe('shouldAllowPermanentlyDeletingRules', () => {
+    beforeEach(() => {
+      jest.spyOn(misc, 'isAdmin').mockReturnValue(true);
+      config.featureToggles.alertingRuleRecoverDeleted = true;
+      config.featureToggles.alertRuleRestore = true;
+    });
+
+    it('allows permanent delete for admins when restore is enabled', () => {
+      expect(shouldAllowPermanentlyDeletingRules()).toBe(true);
+    });
+
+    it('does not allow permanent delete when alert rule restore is disabled', () => {
+      config.featureToggles.alertRuleRestore = false;
+
+      expect(shouldAllowPermanentlyDeletingRules()).toBe(false);
+    });
+
+    it('does not allow permanent delete when recovering deleted rules is disabled', () => {
+      config.featureToggles.alertingRuleRecoverDeleted = false;
+
+      expect(shouldAllowPermanentlyDeletingRules()).toBe(false);
+    });
+
+    it('does not allow permanent delete for non-admins', () => {
+      jest.spyOn(misc, 'isAdmin').mockReturnValue(false);
+
+      expect(shouldAllowPermanentlyDeletingRules()).toBe(false);
     });
   });
 });
