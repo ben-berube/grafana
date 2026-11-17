@@ -161,7 +161,6 @@ describe('useLatestDatasourceCheck', () => {
     jest.clearAllMocks();
     config.featureToggles = {
       ...originalFeatureToggles,
-      grafanaAdvisor: true,
       advisorDatasourceIntegration: true,
     };
     useGetCheckTypeMock.mockReturnValue({ data: undefined, isLoading: false });
@@ -171,8 +170,8 @@ describe('useLatestDatasourceCheck', () => {
     config.featureToggles = originalFeatureToggles;
   });
 
-  it('returns isLoading false when grafanaAdvisor feature toggle is off', () => {
-    config.featureToggles = { ...originalFeatureToggles, grafanaAdvisor: false };
+  it('returns isLoading false when advisor datasource integration is off', () => {
+    config.featureToggles = { ...originalFeatureToggles, advisorDatasourceIntegration: false };
     mockPluginFunctions({});
 
     const { result } = renderHook(() => useLatestDatasourceCheck(), { wrapper });
@@ -224,7 +223,6 @@ describe('useDatasourceFailureByUID', () => {
     jest.clearAllMocks();
     config.featureToggles = {
       ...originalFeatureToggles,
-      grafanaAdvisor: true,
       advisorDatasourceIntegration: true,
     };
     useGetCheckTypeMock.mockReturnValue({ data: undefined, isLoading: false });
@@ -307,7 +305,7 @@ describe('useDatasourceFailureByUID', () => {
   });
 
   it('returns empty map when advisor is disabled', () => {
-    config.featureToggles = { ...originalFeatureToggles, grafanaAdvisor: false };
+    config.featureToggles = { ...originalFeatureToggles, advisorDatasourceIntegration: false };
     mockPluginFunctions({});
 
     const { result } = renderHook(() => useDatasourceFailureByUID(), { wrapper });
@@ -370,7 +368,6 @@ describe('useRetryDatasourceAdvisorCheck', () => {
     jest.clearAllMocks();
     config.featureToggles = {
       ...originalFeatureToggles,
-      grafanaAdvisor: true,
       advisorDatasourceIntegration: true,
     };
     useGetCheckTypeMock.mockReturnValue({ data: undefined, isLoading: false });
@@ -395,7 +392,7 @@ describe('useRetryDatasourceAdvisorCheck', () => {
   });
 
   it('does not call retryCheck when advisor is disabled', async () => {
-    config.featureToggles = { ...originalFeatureToggles, grafanaAdvisor: false };
+    config.featureToggles = { ...originalFeatureToggles, advisorDatasourceIntegration: false };
 
     const retryCheckFn = jest.fn();
     const check = makeCheck({ name: 'check-sk5fn', failures: emptyReport });
@@ -431,7 +428,6 @@ describe('useCreateDatasourceAdvisorChecks', () => {
     jest.clearAllMocks();
     config.featureToggles = {
       ...originalFeatureToggles,
-      grafanaAdvisor: true,
       advisorDatasourceIntegration: true,
     };
     useGetCheckTypeMock.mockReturnValue({ data: undefined, isLoading: false });
@@ -454,7 +450,7 @@ describe('useCreateDatasourceAdvisorChecks', () => {
   });
 
   it('does not call createChecks when advisor is disabled', () => {
-    config.featureToggles = { ...originalFeatureToggles, grafanaAdvisor: false };
+    config.featureToggles = { ...originalFeatureToggles, advisorDatasourceIntegration: false };
     const createChecksFn = jest.fn();
     mockPluginFunctions({ createChecksFn });
 
