@@ -38,6 +38,7 @@ var (
 		"grafana-pyroscope-app":        {ID: "grafana-pyroscope-app"},
 		"grafana-exploretraces-app":    {ID: "grafana-exploretraces-app"},
 		"grafana-metricsdrilldown-app": {ID: "grafana-metricsdrilldown-app"},
+		"grafana-advisor-app":          {ID: "grafana-advisor-app"},
 		"elasticsearch":                {ID: "elasticsearch"},
 		"tempo":                        {ID: "tempo"},
 		"zipkin":                       {ID: "zipkin"},
@@ -152,9 +153,6 @@ func (cfg *Cfg) readPluginSettings(iniFile *ini.File) error {
 		// Add the default preinstalled plugins to pre install plugins async list
 		for _, plugin := range defaultPreinstallPlugins {
 			preinstallPluginsAsync[plugin.ID] = plugin
-		}
-		if cfg.IsFeatureToggleEnabled("grafanaAdvisor") { // Use literal string to avoid circular dependency
-			preinstallPluginsAsync["grafana-advisor-app"] = InstallPlugin{"grafana-advisor-app", "", ""}
 		}
 		if cfg.IsFeatureToggleEnabled("interactiveLearning") { // Use literal string to avoid circular dependency
 			preinstallPluginsAsync["grafana-pathfinder-app"] = InstallPlugin{"grafana-pathfinder-app", "", ""}

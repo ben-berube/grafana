@@ -13,12 +13,6 @@ const testIds = {
   },
 };
 
-test.use({
-  featureToggles: {
-    grafanaAdvisor: true,
-  },
-});
-
 async function isEmptyReport(page: Page) {
   return await page.getByText('No checks run yet').isVisible();
 }

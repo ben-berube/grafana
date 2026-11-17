@@ -671,6 +671,9 @@ func TestReadingNavigationSettings(t *testing.T) {
 		service.readNavigationSettings()
 
 		require.Equal(t, "observability", service.navigationAppConfig["grafana-k8s-app"].SectionID)
+		require.Equal(t, navtree.NavIDCfg, service.navigationAppConfig["grafana-advisor-app"].SectionID)
+		require.Equal(t, "Advisor", service.navigationAppConfig["grafana-advisor-app"].Text)
+		require.Equal(t, "Run checks and get suggestions to fix issues", service.navigationAppConfig["grafana-advisor-app"].SubTitle)
 	})
 
 	t.Run("Can add additional overrides via ini system", func(t *testing.T) {

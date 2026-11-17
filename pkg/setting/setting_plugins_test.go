@@ -438,3 +438,22 @@ func Test_migrateInstallPluginsToPreinstallPluginsSync(t *testing.T) {
 		})
 	}
 }
+
+func TestGrafanaAdvisorIsPreinstalledWithoutFeatureToggle(t *testing.T) {
+	cfg := NewCfg()
+	sec, err := cfg.Raw.NewSection("plugins")
+	require.NoError(t, err)
+	_, err = sec.NewKey("preinstall", "")
+	require.NoError(t, err)
+
+	require.NoError(t, cfg.readPluginSettings(cfg.Raw))
+
+	var found bool
+	for _, plugin := range cfg.PreinstallPluginsAsync {
+		if plugin.ID == "grafana-advisor-app" {
+			found = true
+			break
+		}
+	}
+	require.True(t, found, "grafana-advisor-app should be preinstalled without the grafanaAdvisor toggle")
+}

@@ -850,11 +850,6 @@ export interface FeatureToggles {
   */
   teamLBACApiWriteFromAppPlatform?: boolean;
   /**
-  * Enables Advisor app
-  * @default true
-  */
-  grafanaAdvisor?: boolean;
-  /**
   * Enables less memory intensive Elasticsearch result parsing
   * @default false
   */
