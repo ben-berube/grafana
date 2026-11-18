@@ -45,6 +45,20 @@ describe('TimePickerContent', () => {
       expect(await screen.findByText(/Last 5 minutes/i)).toBeInTheDocument();
     });
 
+    it('applies the quick range that was clicked', async () => {
+      const onChange = jest.fn();
+      renderComponent({ value: absoluteValue, onChange });
+
+      await userEvent.click(await screen.findByText('Last 5 minutes'));
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          raw: { from: 'now-5m', to: 'now' },
+        })
+      );
+    });
+
     it('renders without relative picker', async () => {
       renderComponent({ value: absoluteValue, hideQuickRanges: true });
       expect(await screen.findByText(/absolute time range/i)).toBeInTheDocument();
@@ -206,11 +220,12 @@ function renderComponent({
   history = [],
   hideQuickRanges = false,
   hideTimeZone = false,
+  onChange = noop,
 }: Pick<PropsWithScreenSize, 'value'> & Partial<PropsWithScreenSize>): RenderResult {
   return render(
     <TimePickerContentWithScreenSize
       onChangeTimeZone={noop}
-      onChange={noop}
+      onChange={onChange}
       quickOptions={[
         { from: 'now-5m', to: 'now', display: 'Last 5 minutes' },
         { from: 'now-15m', to: 'now', display: 'Last 15 minutes' },
