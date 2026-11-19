@@ -274,10 +274,6 @@ describe('Variable mutation commands', () => {
   });
 
   describe('parentPath (section variables)', () => {
-    beforeEach(() => {
-      setTestFlags({ dashboardSectionVariables: true });
-    });
-
     function buildSceneWithRow(): DashboardScene {
       const row = new RowItem({ title: 'R', layout: DefaultGridLayoutManager.fromVizPanels([]) });
       const body = new RowsLayoutManager({ rows: [row] });
@@ -496,26 +492,6 @@ describe('Variable mutation commands', () => {
       expect(rowVars.map((v) => v.spec.name)).toEqual(['rowVar']);
     });
 
-    it('ADD_VARIABLE ignores parentPath when dashboardSectionVariables is disabled', async () => {
-      setTestFlags({ dashboardSectionVariables: false });
-      scene = buildSceneWithRow();
-      client = new DashboardMutationClient(scene);
-
-      const result = await client.execute({
-        type: 'ADD_VARIABLE',
-        payload: {
-          parentPath: '/rows/0',
-          variable: { kind: 'CustomVariable', spec: { name: 'fallbackDashVar', query: '1,2' } },
-        },
-      });
-
-      expect(result.success).toBe(true);
-      expect(result.changes[0].path).toBe('/variables/fallbackDashVar');
-      expect((scene.state.$variables as SceneVariableSet).getByName('fallbackDashVar')).toBeDefined();
-      const body = scene.state.body as RowsLayoutManager;
-      expect(body.state.rows[0].state.$variables?.getByName('fallbackDashVar')).toBeUndefined();
-    });
-
     it('ADD_VARIABLE works for parentPath on an inactive tab', async () => {
       scene = buildSceneWithInactiveTab();
       client = new DashboardMutationClient(scene);
@@ -534,58 +510,7 @@ describe('Variable mutation commands', () => {
       expect(body.state.tabs[1].state.$variables?.getByName('inactiveTabVar')).toBeDefined();
     });
 
-    it('UPDATE_VARIABLE ignores parentPath when dashboardSectionVariables is disabled', async () => {
-      setTestFlags({ dashboardSectionVariables: false });
-      scene = buildSceneWithRow();
-      client = new DashboardMutationClient(scene);
-
-      await client.execute({
-        type: 'ADD_VARIABLE',
-        payload: {
-          variable: { kind: 'CustomVariable', spec: { name: 'fallbackDashVar', query: '1,2' } },
-        },
-      });
-
-      const result = await client.execute({
-        type: 'UPDATE_VARIABLE',
-        payload: {
-          parentPath: '/rows/0',
-          name: 'fallbackDashVar',
-          variable: { kind: 'CustomVariable', spec: { name: 'fallbackDashVar', query: '1,2,3' } },
-        },
-      });
-
-      expect(result.success).toBe(true);
-      expect(result.changes[0].path).toBe('/variables/fallbackDashVar');
-    });
-
-    it('REMOVE_VARIABLE ignores parentPath when dashboardSectionVariables is disabled', async () => {
-      setTestFlags({ dashboardSectionVariables: false });
-      scene = buildSceneWithRow();
-      client = new DashboardMutationClient(scene);
-
-      await client.execute({
-        type: 'ADD_VARIABLE',
-        payload: {
-          variable: { kind: 'CustomVariable', spec: { name: 'fallbackDashVar', query: '1,2' } },
-        },
-      });
-
-      const result = await client.execute({
-        type: 'REMOVE_VARIABLE',
-        payload: {
-          parentPath: '/rows/0',
-          name: 'fallbackDashVar',
-        },
-      });
-
-      expect(result.success).toBe(true);
-      expect(result.changes[0].path).toBe('/variables/fallbackDashVar');
-      expect((scene.state.$variables as SceneVariableSet).getByName('fallbackDashVar')).toBeUndefined();
-    });
-
-    it('REMOVE_VARIABLE does not section-scan when dashboardSectionVariables is disabled', async () => {
-      setTestFlags({ dashboardSectionVariables: false });
+    it('REMOVE_VARIABLE asks for parentPath when the variable exists only on a section', async () => {
       scene = buildSceneWithRow();
       client = new DashboardMutationClient(scene);
 
@@ -599,36 +524,17 @@ describe('Variable mutation commands', () => {
       const result = await client.execute({
         type: 'REMOVE_VARIABLE',
         payload: {
-          parentPath: '/rows/0',
           name: 'onlyRow',
         },
       });
 
       expect(result.success).toBe(false);
-      expect(result.error).toBe("Variable 'onlyRow' not found");
-      expect(result.error).not.toContain('not on the dashboard');
-    });
-
-    it('LIST_VARIABLES returns effective scopePath when section variables are disabled', async () => {
-      setTestFlags({ dashboardSectionVariables: false });
-      scene = buildSceneWithRow();
-      client = new DashboardMutationClient(scene);
-
-      const result = await client.execute({
-        type: 'LIST_VARIABLES',
-        payload: { parentPath: '/rows/0' },
-      });
-
-      expect(result.success).toBe(true);
-      expect((result.data as { scopePath: string }).scopePath).toBe('/');
+      expect(result.error).toContain('not on the dashboard');
+      expect(result.error).toContain('parentPath');
     });
   });
 
   describe('real DashboardScene coverage', () => {
-    beforeEach(() => {
-      setTestFlags({ dashboardSectionVariables: true });
-    });
-
     it('runs section variable mutations against a real DashboardScene instance', async () => {
       const scene = getTestDashboardSceneFromSaveModel();
       const row = new RowItem({ title: 'R', layout: DefaultGridLayoutManager.fromVizPanels([]) });

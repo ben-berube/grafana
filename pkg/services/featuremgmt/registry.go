@@ -662,14 +662,6 @@ var (
 			Expression:  "false",
 		},
 		{
-			Name:        "dashboardDefaultLayoutSelector",
-			Description: "Enables default layout selector in dashboard settings",
-			Stage:       FeatureStageGeneralAvailability,
-			Generate:    Generate{LegacyFrontend: true},
-			Owner:       grafanaDashboardsSquad,
-			Expression:  "true",
-		},
-		{
 			Name:        "dashboardAssistantPopover",
 			Description: "Enables the assistant prompt popover on panel click in dashboard view mode",
 			Stage:       FeatureStageExperimental,
@@ -2372,14 +2364,6 @@ var (
 			Generate:     Generate{React: true},
 			Expression:   "false",
 			HideFromDocs: true,
-		},
-		{
-			Name:        "dashboardSectionVariables",
-			Description: "Enables support for section level variables (rows and tabs)",
-			Stage:       FeatureStageGeneralAvailability,
-			Generate:    Generate{LegacyFrontend: true, React: true}, // legacy frontend for old naming convention
-			Owner:       grafanaDashboardsSquad,
-			Expression:  "true", // enabled by default
 		},
 		{
 			Name:            "globalDashboardVariables",

@@ -93,6 +93,11 @@ describe('buildNewDashboardSaveModelV2', () => {
     expect(result.spec.variables).toEqual([]);
   });
 
+  it('sets the default grid layout preference for new rows and tabs', async () => {
+    const result = await buildNewDashboardSaveModelV2();
+    expect(result.spec.preferences?.layout?.kind).toBe('GridLayout');
+  });
+
   describe('when featureToggles.newDashboardWithFiltersAndGroupBy is true', () => {
     beforeAll(() => {
       config.featureToggles.newDashboardWithFiltersAndGroupBy = true;

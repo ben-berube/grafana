@@ -302,27 +302,24 @@ describe('DashboardControls', () => {
     it.each([
       {
         title: 'should include only viewed panel ancestor section variables in panel view mode',
-        featureFlags: { dashboardSectionVariables: true },
         sceneBuilder: buildPanelViewVariablesScene,
         expectedVisible: ['ancestorVar', 'dashboardVar', 'dupVar'],
         expectedHidden: ['otherSectionVar'],
       },
       {
         title: 'should include only edited panel ancestor section variables in panel edit mode',
-        featureFlags: { dashboardSectionVariables: true },
         sceneBuilder: buildPanelEditVariablesScene,
         expectedVisible: ['ancestorVar', 'dashboardVar', 'dupVar'],
         expectedHidden: ['otherSectionVar'],
       },
       {
-        title: 'should not include section variables in panel edit mode when section feature is disabled',
+        title: 'includes ancestor section variables in panel edit mode without a feature toggle',
         sceneBuilder: buildPanelEditVariablesScene,
-        expectedVisible: ['dashboardVar'],
-        expectedHidden: ['ancestorVar', 'otherSectionVar'],
+        expectedVisible: ['ancestorVar', 'dashboardVar', 'dupVar'],
+        expectedHidden: ['otherSectionVar'],
       },
       {
         title: 'should hide repeat local section variables in panel edit mode',
-        featureFlags: { dashboardSectionVariables: true },
         sceneBuilder: buildPanelEditSceneWithRepeatVariable,
         expectedVisible: ['repeatSource'],
         expectedUnique: ['repeatSource'],
@@ -338,8 +335,6 @@ describe('DashboardControls', () => {
     });
 
     it('still mounts ScopesVariable.Component when panel edit variables override is active', async () => {
-      setTestFlags({ dashboardSectionVariables: true });
-
       const scopeVariable = new ScopesVariable({ enable: true });
 
       jest
