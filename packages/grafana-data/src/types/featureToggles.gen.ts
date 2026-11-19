@@ -324,11 +324,6 @@ export interface FeatureToggles {
   */
   dashboardNotebookLayout?: boolean;
   /**
-  * Enables default layout selector in dashboard settings
-  * @default true
-  */
-  dashboardDefaultLayoutSelector?: boolean;
-  /**
   * Enables the assistant prompt popover on panel click in dashboard view mode
   * @default false
   */
@@ -1285,11 +1280,6 @@ export interface FeatureToggles {
   * @default false
   */
   kubernetesAlertingHistorian?: boolean;
-  /**
-  * Enables support for section level variables (rows and tabs)
-  * @default true
-  */
-  dashboardSectionVariables?: boolean;
   /**
   * Enables global and folder-scoped dashboard variables via dashboard.grafana.app
   * @default false

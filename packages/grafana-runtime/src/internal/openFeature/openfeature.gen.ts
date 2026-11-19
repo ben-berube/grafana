@@ -21,8 +21,6 @@ export const FlagKeys = {
   AssistantFrontendToolsDashboardTemplates: "assistant.frontend.tools.dashboardTemplates",
   /** Exposes the semantic (vector) search endpoint for dashboards under the dashboard API */
   DashboardVectorSearch: "dashboard.vectorSearch",
-  /** Enables support for section level variables (rows and tabs) */
-  DashboardSectionVariables: "dashboardSectionVariables",
   /** Enables the Assistant button in the dashboard templates card */
   DashboardTemplatesAssistantButton: "dashboardTemplatesAssistantButton",
   /** Use the new datasource API groups for datasource resource requests, frontend flag */
@@ -167,17 +165,6 @@ export const useFlagAssistantFrontendToolsDashboardTemplates = (options?: ReactF
  */
 export const useFlagDashboardVectorSearch = (options?: ReactFlagEvaluationOptions): boolean => {
   return useFlag("dashboard.vectorSearch", false, options).value;
-};
-
-/**
- * Enables support for section level variables (rows and tabs)
- *
- * **Details:**
- * - flag key: `dashboardSectionVariables`
- * - default value: `true`
- */
-export const useFlagDashboardSectionVariables = (options?: ReactFlagEvaluationOptions): boolean => {
-  return useFlag("dashboardSectionVariables", true, options).value;
 };
 
 /**

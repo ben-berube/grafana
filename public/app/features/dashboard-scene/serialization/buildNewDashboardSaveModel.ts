@@ -161,13 +161,11 @@ export async function buildNewDashboardSaveModelV2(
     data.metadata.annotations[AnnoKeyFolder] = urlFolderUid;
   }
 
-  // Initialize default preferences to be same as the default layout
-  if (config.featureToggles.dashboardDefaultLayoutSelector) {
-    data.spec.preferences = {
-      ...data.spec.preferences,
-      layout: defaultGridLayoutKind(),
-    };
-  }
+  // New dashboards remember the default grid so new rows and tabs use the same layout.
+  data.spec.preferences = {
+    ...data.spec.preferences,
+    layout: defaultGridLayoutKind(),
+  };
 
   return data;
 }

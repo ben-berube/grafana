@@ -16,7 +16,6 @@ import {
   buildVariableChangePath,
   findSectionPathsContainingVariable,
   getEffectiveVariableParentPath,
-  isSectionVariablesFeatureEnabled,
   resolveVariableScope,
 } from './variableScope';
 import { dashboardHasVariableNamed, getScopeVariableArray, replaceScopeVariableSet } from './variableUtils';
@@ -40,12 +39,11 @@ export const updateVariableCommand: MutationCommand<UpdateVariablePayload> = {
     try {
       const { name, variable: variableKind, parentPath } = payload;
       const effectiveParentPath = getEffectiveVariableParentPath(parentPath);
-      const sectionVariablesEnabled = isSectionVariablesFeatureEnabled();
 
       let scope;
       if (effectiveParentPath === '/') {
         if (!dashboardHasVariableNamed(scene, name)) {
-          const sectionPaths = sectionVariablesEnabled ? findSectionPathsContainingVariable(scene, name) : [];
+          const sectionPaths = findSectionPathsContainingVariable(scene, name);
           if (sectionPaths.length === 0) {
             throw new Error(`Variable '${name}' not found`);
           }
