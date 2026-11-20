@@ -88,6 +88,15 @@ echo -e "Starting Grafana server port $PORT"
     cfg:enterprise.license_path="$1"
   )
 
+  # GRAFANA_REACT_RUNTIME=18 serves the React 18 bundle (assets-manifest.json) so e2e suites can
+  # run against both runtimes during the React 19 migration. Unset keeps the flag's default.
+  case "$GRAFANA_REACT_RUNTIME" in
+    18) CMD+=(cfg:feature_toggles.react19=false) ;;
+    19) CMD+=(cfg:feature_toggles.react19=true) ;;
+    "") ;;
+    *) echo "GRAFANA_REACT_RUNTIME must be 18 or 19, got $GRAFANA_REACT_RUNTIME" >&2; exit 1 ;;
+  esac
+
   if [ "$START_IMAGE_RENDERER" ]; then
     CMD+=(
       cfg:rendering.callback_url="http://$DOCKER_HOST:$PORT"
