@@ -2018,9 +2018,7 @@
       "routing-options": {
         "label": {
           "contact-point": "联络点",
-          "notification-policy": "通知策略",
-          "select-contact-point": "选择联络点",
-          "use-notification-policy": "使用通知策略"
+          "notification-policy": "通知策略"
         }
       }
     },

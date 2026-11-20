@@ -2030,9 +2030,7 @@
       "routing-options": {
         "label": {
           "contact-point": "Kapcsolattartási pont",
-          "notification-policy": "Értesítési házirend",
-          "select-contact-point": "Kapcsolattartási pont kiválasztása",
-          "use-notification-policy": "Értesítési házirend használata"
+          "notification-policy": "Értesítési házirend"
         }
       }
     },

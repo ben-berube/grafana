@@ -573,7 +573,8 @@
       "metadata": {
         "name": "alertingNotificationsStepMode",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2024-11-22T11:07:45Z"
+        "creationTimestamp": "2024-11-22T11:07:45Z",
+        "deletionTimestamp": "2026-11-20T19:12:35Z"
       },
       "spec": {
         "description": "Enables simplified step mode in the notifications section",
@@ -630,7 +631,8 @@
       "metadata": {
         "name": "alertingQueryAndExpressionsStepMode",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2024-09-26T06:33:14Z"
+        "creationTimestamp": "2024-09-26T06:33:14Z",
+        "deletionTimestamp": "2026-11-20T19:12:35Z"
       },
       "spec": {
         "description": "Enables step mode for alerting queries and expressions",

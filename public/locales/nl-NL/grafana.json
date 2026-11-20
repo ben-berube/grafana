@@ -2030,9 +2030,7 @@
       "routing-options": {
         "label": {
           "contact-point": "Contactpunt",
-          "notification-policy": "Meldingsbeleid",
-          "select-contact-point": "Contactpunt selecteren",
-          "use-notification-policy": "Meldingsbeleid gebruiken"
+          "notification-policy": "Meldingsbeleid"
         }
       }
     },

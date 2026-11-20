@@ -2030,9 +2030,7 @@
       "routing-options": {
         "label": {
           "contact-point": "Punto di contatto",
-          "notification-policy": "Criterio di notifica",
-          "select-contact-point": "Seleziona punto di contatto",
-          "use-notification-policy": "Usa criterio di notifica"
+          "notification-policy": "Criterio di notifica"
         }
       }
     },

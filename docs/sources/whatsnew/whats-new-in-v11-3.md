@@ -201,7 +201,7 @@ This feature is rolling out to Grafana Cloud over the next couple of weeks.
 
 Grafana Enterprise and OSS:
 
-To use this feature, enable the `alertingQueryAndExpressionsStepMode` feature toggle.
+The simplified query editor is available when creating Grafana-managed alert rules.
 
 {{< figure src="/media/docs/alerting/screenshot-simple-query-form-v11.3.png" max-width="800px"alt="Image shows the alert creation form in simple mode" >}}
 

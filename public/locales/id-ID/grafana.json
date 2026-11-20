@@ -2018,9 +2018,7 @@
       "routing-options": {
         "label": {
           "contact-point": "Titik kontak",
-          "notification-policy": "Kebijakan notifikasi",
-          "select-contact-point": "Pilih titik kontak",
-          "use-notification-policy": "Gunakan kebijakan notifikasi"
+          "notification-policy": "Kebijakan notifikasi"
         }
       }
     },

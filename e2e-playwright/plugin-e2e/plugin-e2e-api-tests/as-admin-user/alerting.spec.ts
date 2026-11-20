@@ -1,15 +1,15 @@
 import * as e2e from '@grafana/e2e-selectors';
 import { expect, test } from '@grafana/plugin-e2e';
 
-// let's disable the feature toggles for now, otherwise the getAlertRuleQueryRow fails and I don't see any other way to get the query row
-test.use({ featureToggles: { alertingQueryAndExpressionsStepMode: false, alertingNotificationsStepMode: false } });
-
 test.describe('plugin-e2e-api-tests admin', { tag: ['@plugins'] }, () => {
   test('should evaluate to false if entire request returns 200 but partial query result is invalid', async ({
     page,
     alertRuleEditPage,
   }) => {
     await alertRuleEditPage.alertRuleNameField.fill('Test Alert Rule');
+
+    // The query row API targets the advanced editor. Simplified mode is the default.
+    await page.getByTestId('advanced-mode-switch step-2').click();
 
     //add working query
     const queryA = alertRuleEditPage.getAlertRuleQueryRow('A');
