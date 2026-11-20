@@ -2,10 +2,9 @@ import { type UserEvent } from '@testing-library/user-event';
 import * as React from 'react';
 import { renderRuleEditor, ui } from 'test/helpers/alertingRuleEditor';
 import { clickSelectOption } from 'test/helpers/selectOptionInTest';
-import { screen, testWithFeatureToggles } from 'test/test-utils';
+import { screen } from 'test/test-utils';
 import { byRole } from 'testing-library-selector';
 
-import { type FeatureToggles } from '@grafana/data';
 import { mockBoundingClientRect } from '@grafana/test-utils';
 import { contextSrv } from 'app/core/services/context_srv';
 import { setupMswServer } from 'app/features/alerting/unified/mockApi';
@@ -75,66 +74,43 @@ describe('RuleEditor grafana recording rules', () => {
     ]);
   });
 
-  const testCreateGrafanaRR = (featureToggles: Array<keyof FeatureToggles>, testName: string) => {
-    testWithFeatureToggles({ enable: featureToggles });
+  it('can create new grafana recording rule', async () => {
+    const capture = captureRequests((r) => r.method === 'POST' && r.url.includes('/api/ruler/'));
 
-    it(testName, async () => {
-      const capture = captureRequests((r) => r.method === 'POST' && r.url.includes('/api/ruler/'));
+    const { user } = renderRuleEditor(undefined, 'grafana-recording');
 
-      const { user } = renderRuleEditor(undefined, 'grafana-recording');
+    await user.type(await ui.inputs.name.find(), 'my great new rule');
+    await user.type(await ui.inputs.metric.find(), 'metricName');
 
-      await user.type(await ui.inputs.name.find(), 'my great new rule');
-      await user.type(await ui.inputs.metric.find(), 'metricName');
+    const targetDsField = await ui.inputs.targetDatasource.find();
+    const dsPickerInput = await ui.inputs.dataSource.find(targetDsField);
+    await user.click(dsPickerInput);
+    await user.click(await screen.findByText('Prom'));
 
-      const targetDsField = await ui.inputs.targetDatasource.find();
-      const dsPickerInput = await ui.inputs.dataSource.find(targetDsField);
-      await user.click(dsPickerInput);
-      await user.click(await screen.findByText('Prom'));
+    await selectFolderAndGroup(user);
 
-      await selectFolderAndGroup(user);
+    await user.click(ui.buttons.save.get());
 
-      await user.click(ui.buttons.save.get());
+    const requests = await capture;
+    const serializedRequests = await serializeRequests(requests);
+    expect(serializedRequests).toMatchSnapshot();
+  });
 
-      const requests = await capture;
-      const serializedRequests = await serializeRequests(requests);
-      expect(serializedRequests).toMatchSnapshot();
-    });
-  };
+  it('cannot create new grafana recording rule with invalid metric name', async () => {
+    const capture = captureRequests((r) => r.method === 'POST' && r.url.includes('/api/ruler/'));
+    const { user } = renderRuleEditor(undefined, 'grafana-recording');
 
-  const testCreateGrafanaRRWithInvalidMetricName = (featureToggles: Array<keyof FeatureToggles>, testName: string) => {
-    testWithFeatureToggles({ enable: featureToggles });
+    await user.type(await ui.inputs.name.find(), 'my great new rule');
 
-    it(testName, async () => {
-      const capture = captureRequests((r) => r.method === 'POST' && r.url.includes('/api/ruler/'));
-      const { user } = renderRuleEditor(undefined, 'grafana-recording');
+    const targetDsField = await ui.inputs.targetDatasource.find();
+    const dsPickerInput = await ui.inputs.dataSource.find(targetDsField);
+    await user.click(dsPickerInput);
+    await user.click(await screen.findByText('Prom'));
 
-      await user.type(await ui.inputs.name.find(), 'my great new rule');
+    await selectFolderAndGroup(user);
 
-      const targetDsField = await ui.inputs.targetDatasource.find();
-      const dsPickerInput = await ui.inputs.dataSource.find(targetDsField);
-      await user.click(dsPickerInput);
-      await user.click(await screen.findByText('Prom'));
-
-      await selectFolderAndGroup(user);
-
-      await user.click(ui.buttons.save.get());
-      const requests = await capture;
-      expect(requests).toHaveLength(0);
-    });
-  };
-
-  testCreateGrafanaRR([], 'can create new grafana recording rule with simplified steps feature toggles disabled');
-  testCreateGrafanaRR(
-    ['alertingQueryAndExpressionsStepMode', 'alertingNotificationsStepMode'],
-    'can create new grafana recording rule with simplified steps enabled'
-  );
-
-  testCreateGrafanaRRWithInvalidMetricName(
-    [],
-    'cannot create new grafana recording rule with invalid metric name with simplified steps feature toggles disabled'
-  );
-  testCreateGrafanaRRWithInvalidMetricName(
-    ['alertingQueryAndExpressionsStepMode', 'alertingNotificationsStepMode'],
-    'cannot create new grafana recording rule with invalid metric name with simplified steps enabled'
-  );
+    await user.click(ui.buttons.save.get());
+    const requests = await capture;
+    expect(requests).toHaveLength(0);
+  });
 });

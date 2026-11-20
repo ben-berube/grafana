@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { renderRuleEditor, ui } from 'test/helpers/alertingRuleEditor';
+import { GrafanaRuleFormStep, renderRuleEditor, ui } from 'test/helpers/alertingRuleEditor';
 import { clickSelectOption, selectOptionInTest } from 'test/helpers/selectOptionInTest';
 import { screen, testWithFeatureToggles, waitFor } from 'test/test-utils';
 import { byRole } from 'testing-library-selector';
@@ -210,10 +210,11 @@ describe('RuleEditor grafana managed rules', () => {
       )
     );
 
-    renderRuleEditor();
+    const { user } = renderRuleEditor();
 
-    // Wait for the form to load
+    // Wait for the form to load, then open the advanced query editor where the rule type switch lives.
     await screen.findByRole('textbox', { name: 'name' });
+    await user.click(await ui.inputs.switchModeBasic(GrafanaRuleFormStep.Query).find());
 
     // The rule type switch should NOT be visible
     expect(screen.queryByText('Rule type')).not.toBeInTheDocument();
@@ -235,10 +236,11 @@ describe('RuleEditor grafana managed rules', () => {
       )
     );
 
-    renderRuleEditor();
+    const { user } = renderRuleEditor();
 
-    // Wait for the form to load
+    // The rule type switch is part of the advanced query editor.
     await screen.findByRole('textbox', { name: 'name' });
+    await user.click(await ui.inputs.switchModeBasic(GrafanaRuleFormStep.Query).find());
 
     // The rule type section should be visible
     expect(await screen.findByText('Rule type')).toBeInTheDocument();
@@ -302,7 +304,8 @@ describe('RuleEditor with alertingDisableDMAinUI feature toggle', () => {
     // Should be able to interact with the alert name input
     await user.type(ui.inputs.name.get(), 'My Grafana-managed alert');
 
-    // Expressions should still be available for Grafana-managed alerts
+    // Expressions stay available in the advanced query editor.
+    await user.click(await ui.inputs.switchModeBasic(GrafanaRuleFormStep.Query).find());
     const removeExpressionsButtons = await screen.findAllByLabelText(/Remove expression/);
     expect(removeExpressionsButtons.length).toBeGreaterThan(0);
   });

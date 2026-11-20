@@ -2030,9 +2030,7 @@
       "routing-options": {
         "label": {
           "contact-point": "İletişim noktası",
-          "notification-policy": "Bildirim politikası",
-          "select-contact-point": "İletişim noktası seçin",
-          "use-notification-policy": "Bildirim politikası kullanın"
+          "notification-policy": "Bildirim politikası"
         }
       }
     },

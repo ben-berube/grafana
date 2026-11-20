@@ -2054,9 +2054,7 @@
       "routing-options": {
         "label": {
           "contact-point": "Punkt kontaktu",
-          "notification-policy": "Zasady dotyczące powiadomień",
-          "select-contact-point": "Wybierz punkt kontaktu",
-          "use-notification-policy": "Używaj zasad dotyczących powiadomień"
+          "notification-policy": "Zasady dotyczące powiadomień"
         }
       }
     },

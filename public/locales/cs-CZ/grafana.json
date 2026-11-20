@@ -2054,9 +2054,7 @@
       "routing-options": {
         "label": {
           "contact-point": "Kontaktní bod",
-          "notification-policy": "Zásada oznamování",
-          "select-contact-point": "Vybrat kontaktní bod",
-          "use-notification-policy": "Použít zásadu oznamování"
+          "notification-policy": "Zásada oznamování"
         }
       }
     },

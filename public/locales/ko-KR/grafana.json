@@ -2018,9 +2018,7 @@
       "routing-options": {
         "label": {
           "contact-point": "연락처",
-          "notification-policy": "알림 정책",
-          "select-contact-point": "연락처 선택",
-          "use-notification-policy": "알림 정책 사용"
+          "notification-policy": "알림 정책"
         }
       }
     },

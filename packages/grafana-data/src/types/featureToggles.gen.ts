@@ -705,11 +705,6 @@ export interface FeatureToggles {
   */
   groupToNestedTableV2?: boolean;
   /**
-  * Enables step mode for alerting queries and expressions
-  * @default true
-  */
-  alertingQueryAndExpressionsStepMode?: boolean;
-  /**
   * Enables improved support for OAuth external sessions. After enabling this feature, users might need to re-authenticate themselves.
   * @default true
   */
@@ -809,11 +804,6 @@ export interface FeatureToggles {
   * @default false
   */
   alertingAIAnalyzeCentralStateHistory?: boolean;
-  /**
-  * Enables simplified step mode in the notifications section
-  * @default true
-  */
-  alertingNotificationsStepMode?: boolean;
   /**
   * Enables cross cluster search in the Elasticsearch data source
   * @default false
