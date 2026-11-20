@@ -2,6 +2,8 @@ node_modules
 npm-debug.log
 yarn-error.log
 coverage/
+/.react19-console
+/.react18-console
 .aws-config.json
 awsconfig
 /.awcache
