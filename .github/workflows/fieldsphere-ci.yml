@@ -78,3 +78,19 @@ jobs:
         env:
           # Root tsc + Nx package graphs are memory-heavy; default heap can OOM on ubuntu-latest.
           NODE_OPTIONS: --max-old-space-size=6144
+
+  react19:
+    name: React 19 allowlist (Jest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-node
+      - uses: ./.github/actions/yarn-install
+      - name: Allowlist only grows
+        run: node scripts/react19/check-allowlist.js "origin/${{ github.base_ref || 'main' }}"
+      - name: Allowlisted units pass on React 19
+        run: node scripts/react19/run.js --ci -w 100%
