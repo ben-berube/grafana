@@ -635,7 +635,7 @@ func Initialize(ctx context.Context, cfg *setting.Cfg, opts Options, apiOpts api
 	if err != nil {
 		return nil, err
 	}
-	oauthtokenService := oauthtoken.ProvideService(socialService, authinfoimplService, cfg, registerer, serverLockService, tracingService, userAuthTokenService, featureToggles)
+	oauthtokenService := oauthtoken.ProvideService(socialService, authinfoimplService, cfg, registerer, serverLockService, tracingService, userAuthTokenService)
 	ossCachingService := caching.ProvideCachingService()
 	cachingServiceClient := caching.ProvideCachingServiceClient(ossCachingService, featureToggles)
 	middlewareHandler, err := pluginsintegration.ProvideClientWithMiddlewares(cfg, inMemory, oauthtokenService, tracingService, cachingServiceClient, featureToggles, registerer)
@@ -1460,7 +1460,7 @@ func InitializeForTest(ctx context.Context, t sqlutil.ITestDB, testingT interfac
 		return nil, err
 	}
 	authinfoimplService := authinfoimpl.ProvideService(loginStore, remoteCache, secretsService)
-	oauthtokenService := oauthtoken.ProvideService(socialService, authinfoimplService, cfg, registerer, serverLockService, tracingService, userAuthTokenService, featureToggles)
+	oauthtokenService := oauthtoken.ProvideService(socialService, authinfoimplService, cfg, registerer, serverLockService, tracingService, userAuthTokenService)
 	dataSourceProxyService := datasourceproxy.ProvideService(cacheServiceImpl, ossDataSourceRequestValidator, pluginstoreService, cfg, httpclientProvider, oauthtokenService, service13, tracingService, secretsService, featureToggles)
 	k8sClients := api2.ProvideK8sClients(cfg, eventualRestConfigProvider)
 	searchService := search2.ProvideService(cfg, sqlStore, k8sClients, dashboardService, folderimplService, featureToggles, sortService)
