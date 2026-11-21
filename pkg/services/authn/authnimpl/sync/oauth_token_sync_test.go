@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/singleflight"
 
@@ -23,7 +24,6 @@ import (
 	"github.com/grafana/grafana/pkg/services/authn"
 	"github.com/grafana/grafana/pkg/services/contexthandler/ctxkey"
 	contextmodel "github.com/grafana/grafana/pkg/services/contexthandler/model"
-	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/login"
 	"github.com/grafana/grafana/pkg/services/oauthtoken"
 	"github.com/grafana/grafana/pkg/services/oauthtoken/oauthtokentest"
@@ -129,7 +129,6 @@ func TestOAuthTokenSync_SyncOAuthTokenHook(t *testing.T) {
 				singleflightGroup: new(singleflight.Group),
 				tracer:            tracing.InitializeTracerForTest(),
 				cache:             localcache.New(maxOAuthTokenCacheTTL, 15*time.Minute),
-				features:          featuremgmt.WithFeatures(),
 			}
 
 			ctx := context.Background()
@@ -141,4 +140,43 @@ func TestOAuthTokenSync_SyncOAuthTokenHook(t *testing.T) {
 			assert.Equal(t, tt.expectRevokeTokenCalled, revokeTokenCalled)
 		})
 	}
+}
+
+func TestOAuthTokenSync_RefreshCheckIsScopedToSession(t *testing.T) {
+	var refreshedSessions []int64
+	service := &oauthtokentest.MockOauthTokenService{
+		TryTokenRefreshFunc: func(_ context.Context, _ identity.Requester, meta *oauthtoken.TokenRefreshMetadata) (*oauth2.Token, error) {
+			refreshedSessions = append(refreshedSessions, meta.ExternalSessionID)
+			return &oauth2.Token{AccessToken: "access", Expiry: time.Now().Add(time.Hour)}, nil
+		},
+	}
+
+	sync := &OAuthTokenSync{
+		log:               log.NewNopLogger(),
+		service:           service,
+		sessionService:    &authtest.FakeUserAuthTokenService{},
+		socialService:     &socialtest.FakeSocialService{ExpectedAuthInfoProvider: &social.OAuthInfo{UseRefreshToken: true}},
+		singleflightGroup: new(singleflight.Group),
+		tracer:            tracing.InitializeTracerForTest(),
+		cache:             localcache.New(maxOAuthTokenCacheTTL, 15*time.Minute),
+	}
+
+	ctx := context.WithValue(context.Background(), ctxkey.Key{}, &contextmodel.ReqContext{})
+	firstSession := &authn.Identity{
+		ID:              "1",
+		Type:            claims.TypeUser,
+		AuthenticatedBy: login.AzureADAuthModule,
+		SessionToken:    &auth.UserToken{Id: 11, ExternalSessionId: 11},
+	}
+	secondSession := &authn.Identity{
+		ID:              "1",
+		Type:            claims.TypeUser,
+		AuthenticatedBy: login.AzureADAuthModule,
+		SessionToken:    &auth.UserToken{Id: 22, ExternalSessionId: 22},
+	}
+
+	require.NoError(t, sync.SyncOauthTokenHook(ctx, firstSession, nil))
+	require.NoError(t, sync.SyncOauthTokenHook(ctx, firstSession, nil))
+	require.NoError(t, sync.SyncOauthTokenHook(ctx, secondSession, nil))
+	assert.Equal(t, []int64{11, 22}, refreshedSessions)
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/open-feature/go-sdk/openfeature"
 	"github.com/open-feature/go-sdk/openfeature/memprovider"
@@ -13,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/oauth2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
@@ -991,7 +993,7 @@ func TestUserSync_SyncUserHook(t *testing.T) {
 					featuremgmt.FlagRememberUserOrgForSso: setting.NewInMemoryFlag(featuremgmt.FlagRememberUserOrgForSso, false),
 				})
 			}
-			s := ProvideUserSync(tt.fields.userService, userProtection, tt.fields.authInfoService, tt.fields.quotaService, tracing.InitializeTracerForTest(), featuremgmt.WithFeatures(), cfg, nil)
+			s := ProvideUserSync(tt.fields.userService, userProtection, tt.fields.authInfoService, tt.fields.quotaService, tracing.InitializeTracerForTest(), cfg, nil)
 			err := s.SyncUserHook(context.Background(), tt.args.id, nil)
 			if tt.wantErr {
 				require.Error(t, err)
@@ -1017,7 +1019,6 @@ func TestUserSync_SyncUserRetryFetch(t *testing.T) {
 		&authinfotest.FakeService{},
 		&quotatest.FakeQuotaService{},
 		tracing.NewNoopTracerService(),
-		featuremgmt.WithFeatures(),
 		setting.NewCfg(),
 		nil,
 	)
@@ -2078,7 +2079,6 @@ func TestUserSync_SyncUserHook_SCIMUserSAMLLoginUpdatesExistingUserAuth(t *testi
 		authInfoSrv,
 		&quotatest.FakeQuotaService{},
 		tracing.NewNoopTracerService(),
-		featuremgmt.WithFeatures(),
 		setting.NewCfg(),
 		nil,
 	)
@@ -2132,7 +2132,6 @@ func TestUserSync_SyncUserHook_NonProvisionedSAMLUserCreatesNewAuthConnection(t 
 		authInfoSrv,
 		&quotatest.FakeQuotaService{},
 		tracing.NewNoopTracerService(),
-		featuremgmt.WithFeatures(),
 		setting.NewCfg(),
 		nil,
 	)
@@ -2154,6 +2153,70 @@ func TestUserSync_SyncUserHook_NonProvisionedSAMLUserCreatesNewAuthConnection(t 
 
 	require.NoError(t, err)
 	authInfoSrv.AssertNotCalled(t, "UpdateAuthInfo", mock.Anything, mock.Anything)
+}
+
+func TestUserSync_SyncUserHook_DoesNotStoreOAuthTokenOnAuthInfo(t *testing.T) {
+	userSrv := usertest.NewMockService(t)
+	authInfoSrv := authinfotest.NewMockAuthInfoService(t)
+
+	oauthUser := &user.User{
+		ID:    555,
+		UID:   "user-uid-555",
+		Login: "oauth.user",
+		Email: "oauth.user@example.com",
+		Name:  "OAuth User",
+	}
+
+	authInfoSrv.On("GetAuthInfo", mock.Anything, mock.MatchedBy(func(q *login.GetAuthInfoQuery) bool {
+		return q.AuthId == "oauth-auth-id" && q.AuthModule == login.GenericOAuthModule
+	})).Return(nil, user.ErrUserNotFound).Once()
+
+	userSrv.On("GetByEmail", mock.Anything, mock.Anything).Return(oauthUser, nil).Once()
+
+	authInfoSrv.On("GetAuthInfo", mock.Anything, mock.MatchedBy(func(q *login.GetAuthInfoQuery) bool {
+		return q.UserId == oauthUser.ID && q.AuthModule == login.GenericOAuthModule && q.AuthId == ""
+	})).Return(nil, user.ErrUserNotFound).Once()
+
+	authInfoSrv.On("SetAuthInfo", mock.Anything, mock.MatchedBy(func(cmd *login.SetAuthInfoCommand) bool {
+		return cmd.UserId == 555 &&
+			cmd.AuthModule == login.GenericOAuthModule &&
+			cmd.AuthId == "oauth-auth-id" &&
+			cmd.OAuthToken == nil
+	})).Return(nil).Once()
+
+	provider.UsingFlags(t, defaultFeatureFlags)
+
+	s := ProvideUserSync(
+		userSrv,
+		authinfoimpl.ProvideOSSUserProtectionService(),
+		authInfoSrv,
+		&quotatest.FakeQuotaService{},
+		tracing.NewNoopTracerService(),
+		setting.NewCfg(),
+		nil,
+	)
+
+	email := "oauth.user@example.com"
+	err := s.SyncUserHook(context.Background(), &authn.Identity{
+		AuthID:          "oauth-auth-id",
+		AuthenticatedBy: login.GenericOAuthModule,
+		Login:           "oauth.user",
+		Email:           email,
+		Name:            "OAuth User",
+		OAuthToken: &oauth2.Token{
+			AccessToken:  "access",
+			RefreshToken: "refresh",
+			Expiry:       time.Now().Add(time.Hour),
+		},
+		ClientParams: authn.ClientParams{
+			SyncUser: true,
+			LookUpParams: login.UserLookupParams{
+				Email: &email,
+			},
+		},
+	}, nil)
+
+	require.NoError(t, err)
 }
 
 func TestUserSync_SyncUserHook_SCIMAuthModuleMismatch(t *testing.T) {
@@ -2182,7 +2245,6 @@ func TestUserSync_SyncUserHook_SCIMAuthModuleMismatch(t *testing.T) {
 		authInfoSrv,
 		&quotatest.FakeQuotaService{},
 		tracing.NewNoopTracerService(),
-		featuremgmt.WithFeatures(),
 		setting.NewCfg(),
 		nil,
 	)
@@ -2235,7 +2297,6 @@ func TestUserSync_SyncUserHook_SCIMUserAllowsGCOMLogin(t *testing.T) {
 		authInfoSrv,
 		&quotatest.FakeQuotaService{},
 		tracing.NewNoopTracerService(),
-		featuremgmt.WithFeatures(),
 		setting.NewCfg(),
 		nil,
 	)
@@ -2322,7 +2383,6 @@ func TestUserSync_createUser_PassesOrgRoleAsDefaultOrgRole(t *testing.T) {
 				},
 				&quotatest.FakeQuotaService{},
 				tracing.InitializeTracerForTest(),
-				featuremgmt.WithFeatures(),
 				setting.NewCfg(),
 				nil,
 			)
@@ -2400,7 +2460,6 @@ func TestUserSync_SyncUserHook_AlignsOrgIDForK8sRole(t *testing.T) {
 				},
 				&quotatest.FakeQuotaService{},
 				tracing.InitializeTracerForTest(),
-				featuremgmt.WithFeatures(),
 				setting.NewCfg(),
 				nil,
 			)
@@ -2525,7 +2584,6 @@ func TestUserSync_updateUserAttributes_SyncsOrgRoleForK8s(t *testing.T) {
 				&authinfotest.FakeService{},
 				&quotatest.FakeQuotaService{},
 				tracing.InitializeTracerForTest(),
-				featuremgmt.WithFeatures(),
 				cfg,
 				nil,
 			)
@@ -2744,7 +2802,6 @@ func TestUserSync_SyncUserHook_PopulatesExternalAuthInfo(t *testing.T) {
 				},
 				&quotatest.FakeQuotaService{},
 				tracing.InitializeTracerForTest(),
-				featuremgmt.WithFeatures(),
 				cfg,
 				nil,
 			)
@@ -2797,7 +2854,6 @@ func TestUserSync_SyncUserHook_SkipsAnonymousIdentity(t *testing.T) {
 		&authinfotest.FakeService{},
 		&quotatest.FakeQuotaService{},
 		tracing.InitializeTracerForTest(),
-		featuremgmt.WithFeatures(),
 		cfg,
 		nil,
 	)

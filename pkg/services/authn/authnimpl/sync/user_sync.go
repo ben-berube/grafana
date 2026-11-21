@@ -100,7 +100,7 @@ type StaticSCIMConfig struct {
 }
 
 func ProvideUserSync(userService user.Service, userProtectionService login.UserProtectionService, authInfoService login.AuthInfoService,
-	quotaService quota.Service, tracer tracing.Tracer, features featuremgmt.FeatureToggles, cfg *setting.Cfg,
+	quotaService quota.Service, tracer tracing.Tracer, cfg *setting.Cfg,
 	k8sClient client.K8sHandler,
 ) *UserSync {
 	scimSection := cfg.Raw.Section("auth.scim")
@@ -119,7 +119,6 @@ func ProvideUserSync(userService user.Service, userProtectionService login.UserP
 		quotaService:              quotaService,
 		log:                       log.New("user.sync"),
 		tracer:                    tracer,
-		features:                  features,
 		openFeatureClient:         openfeature.NewDefaultClient(),
 		lastSeenSF:                &singleflight.Group{},
 		scimUtil:                  scimutil.NewSCIMUtil(k8sClient),
@@ -137,7 +136,6 @@ type UserSync struct {
 	quotaService              quota.Service
 	log                       log.Logger
 	tracer                    tracing.Tracer
-	features                  featuremgmt.FeatureToggles
 	openFeatureClient         *openfeature.Client
 	lastSeenSF                *singleflight.Group
 	scimUtil                  *scimutil.SCIMUtil
@@ -483,10 +481,6 @@ func (s *UserSync) upsertAuthConnection(ctx context.Context, usr *user.User, ide
 			AuthId:     identity.AuthID,
 		}
 
-		//nolint:staticcheck // not yet migrated to OpenFeature
-		if !s.features.IsEnabledGlobally(featuremgmt.FlagImprovedExternalSessionHandling) {
-			setAuthInfoCmd.OAuthToken = identity.OAuthToken
-		}
 		return s.authInfoService.SetAuthInfo(ctx, setAuthInfoCmd)
 	}
 
@@ -494,11 +488,6 @@ func (s *UserSync) upsertAuthConnection(ctx context.Context, usr *user.User, ide
 		UserId:     usr.ID,
 		AuthId:     identity.AuthID,
 		AuthModule: identity.AuthenticatedBy,
-	}
-
-	//nolint:staticcheck // not yet migrated to OpenFeature
-	if !s.features.IsEnabledGlobally(featuremgmt.FlagImprovedExternalSessionHandling) {
-		updateAuthInfoCmd.OAuthToken = identity.OAuthToken
 	}
 
 	s.log.FromContext(ctx).Debug("Updating auth connection for user", "id", identity.ID)
