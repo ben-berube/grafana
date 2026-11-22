@@ -18,8 +18,6 @@ import (
 
 	prom_model "github.com/prometheus/common/model"
 
-	"github.com/grafana/grafana/pkg/services/featuremgmt"
-
 	ngmodels "github.com/grafana/grafana/pkg/services/ngalert/models"
 	"github.com/grafana/grafana/pkg/tests/apis/alerting/rules/common"
 	"github.com/grafana/grafana/pkg/tests/testinfra"
@@ -721,11 +719,7 @@ func TestIntegrationNotificationSettings(t *testing.T) {
 	testutil.SkipIntegrationTestInShortMode(t)
 
 	ctx := context.Background()
-	helper := apis.NewK8sTestHelper(t, testinfra.GrafanaOpts{
-		EnableFeatureToggles: []string{
-			featuremgmt.FlagAlertingMultiplePolicies,
-		},
-	})
+	helper := apis.NewK8sTestHelper(t, testinfra.GrafanaOpts{})
 	client := common.NewAlertRuleClient(t, helper.Org1.Admin)
 
 	common.CreateTestFolder(t, helper, "test-folder")
@@ -1369,11 +1363,7 @@ func TestIntegrationListWithNamedRoutingTreeFieldSelectors(t *testing.T) {
 	testutil.SkipIntegrationTestInShortMode(t)
 
 	ctx := context.Background()
-	helper := apis.NewK8sTestHelper(t, testinfra.GrafanaOpts{
-		EnableFeatureToggles: []string{
-			featuremgmt.FlagAlertingMultiplePolicies,
-		},
-	})
+	helper := apis.NewK8sTestHelper(t, testinfra.GrafanaOpts{})
 	client := common.NewAlertRuleClient(t, helper.Org1.Admin)
 
 	common.CreateTestFolder(t, helper, "rt-fs-folder")
