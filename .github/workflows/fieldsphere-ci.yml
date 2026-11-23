@@ -93,4 +93,6 @@ jobs:
       - name: Allowlist only grows
         run: node scripts/react19/check-allowlist.js "origin/${{ github.base_ref || 'main' }}"
       - name: Allowlisted units pass on React 19
-        run: node scripts/react19/run.js --ci -w 100%
+        run: node scripts/react19/run.js --record --ci -w 100%
+      - name: Allowlisted units stay within their console budget
+        run: node scripts/react19/console-budget.js check

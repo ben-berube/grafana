@@ -41,6 +41,7 @@
     "test:profile": "node --cpu-prof --cpu-prof-dir=.profiles --cpu-prof-name=grafana-jest-$(date -u +\"%Y-%m-%dT%H:%M:%S\").cpuprofile node_modules/.bin/jest --runInBand --no-coverage --no-cache",
     "test:react19": "node scripts/react19/run.js",
     "test:react19:check-allowlist": "node scripts/react19/check-allowlist.js",
+    "test:react19:console-budget": "node scripts/react19/console-budget.js",
     "test:react19:status": "node scripts/react19/units.js",
     "test:ci": "mkdir -p reports/junit && JEST_JUNIT_OUTPUT_DIR=reports/junit jest --ci --reporters=default --reporters=jest-junit -w ${TEST_MAX_WORKERS:-100%} --shard=${TEST_SHARD:-1}/${TEST_SHARD_TOTAL:-1}",
     "lint": "yarn run lint:ts && yarn run lint:sass",
