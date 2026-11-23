@@ -28,7 +28,7 @@ func TestWithQueryDataCaching(t *testing.T) {
 	t.Run("cache status is included in the response if a request context is available", func(t *testing.T) {
 		fakeCachingService := NewFakeOSSCachingService()
 		fakeCachingService.ReturnStatus = StatusMiss
-		client := ProvideCachingServiceClient(fakeCachingService, nil)
+		client := ProvideCachingServiceClient(fakeCachingService)
 
 		req := backend.QueryDataRequest{}
 
@@ -50,7 +50,7 @@ func TestWithQueryDataCaching(t *testing.T) {
 	t.Run("caching can be used without a request context", func(t *testing.T) {
 		fakeCachingService := NewFakeOSSCachingService()
 		fakeCachingService.ReturnStatus = StatusMiss
-		client := ProvideCachingServiceClient(fakeCachingService, nil)
+		client := ProvideCachingServiceClient(fakeCachingService)
 
 		req := backend.QueryDataRequest{}
 
@@ -78,7 +78,7 @@ func TestWithCallResourceCaching(t *testing.T) {
 	t.Run("cache status is included in the response if a request context is available", func(t *testing.T) {
 		fakeCachingService := NewFakeOSSCachingService()
 		fakeCachingService.ReturnStatus = StatusMiss
-		client := ProvideCachingServiceClient(fakeCachingService, nil)
+		client := ProvideCachingServiceClient(fakeCachingService)
 
 		req := backend.CallResourceRequest{}
 
@@ -102,7 +102,7 @@ func TestWithCallResourceCaching(t *testing.T) {
 	t.Run("caching can be used without a request context", func(t *testing.T) {
 		fakeCachingService := NewFakeOSSCachingService()
 		fakeCachingService.ReturnStatus = StatusMiss
-		client := ProvideCachingServiceClient(fakeCachingService, nil)
+		client := ProvideCachingServiceClient(fakeCachingService)
 
 		req := backend.CallResourceRequest{}
 
@@ -115,6 +115,59 @@ func TestWithCallResourceCaching(t *testing.T) {
 			return fakeErr
 		})
 		require.ErrorIs(t, err, fakeErr)
+	})
+}
+
+func TestWithQueryDataCachingAsyncResults(t *testing.T) {
+	origShouldCacheQuery := ShouldCacheQuery
+	t.Cleanup(func() {
+		ShouldCacheQuery = origShouldCacheQuery
+	})
+
+	reqCtx := &contextmodel.ReqContext{
+		Context: &web.Context{
+			Resp: web.NewResponseWriter("", httptest.NewRecorder()),
+		},
+	}
+	ctx := context.WithValue(t.Context(), ctxkey.Key{}, reqCtx)
+	req := &backend.QueryDataRequest{
+		PluginContext: backend.PluginContext{
+			DataSourceInstanceSettings: &backend.DataSourceInstanceSettings{Type: "grafana-athena-datasource"},
+		},
+	}
+
+	t.Run("finished queries are cached", func(t *testing.T) {
+		ShouldCacheQuery = func(*backend.QueryDataResponse) bool { return true }
+		updated := false
+		fakeCachingService := NewFakeOSSCachingService()
+		fakeCachingService.ReturnQueryResponse = CachedQueryDataResponse{
+			UpdateCacheFn: func(context.Context, *backend.QueryDataResponse) {
+				updated = true
+			},
+		}
+		client := ProvideCachingServiceClient(fakeCachingService)
+		_, err := client.WithQueryDataCaching(ctx, req, func() (*backend.QueryDataResponse, error) {
+			return &backend.QueryDataResponse{}, nil
+		})
+		require.NoError(t, err)
+		require.True(t, updated)
+	})
+
+	t.Run("running async queries are not cached", func(t *testing.T) {
+		ShouldCacheQuery = func(*backend.QueryDataResponse) bool { return false }
+		updated := false
+		fakeCachingService := NewFakeOSSCachingService()
+		fakeCachingService.ReturnQueryResponse = CachedQueryDataResponse{
+			UpdateCacheFn: func(context.Context, *backend.QueryDataResponse) {
+				updated = true
+			},
+		}
+		client := ProvideCachingServiceClient(fakeCachingService)
+		_, err := client.WithQueryDataCaching(ctx, req, func() (*backend.QueryDataResponse, error) {
+			return &backend.QueryDataResponse{}, nil
+		})
+		require.NoError(t, err)
+		require.False(t, updated)
 	})
 }
 
