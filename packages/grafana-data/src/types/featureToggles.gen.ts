@@ -139,11 +139,6 @@ export interface FeatureToggles {
   */
   grafanaAPIServerEnsureKubectlAccess?: boolean;
   /**
-  * Enable caching for async queries for Redshift and Athena. Requires that the data source has caching and async query support enabled
-  * @default true
-  */
-  awsAsyncQueryCaching?: boolean;
-  /**
   * Enable changing the scheduler base interval via configuration option unified_alerting.scheduler_tick_interval
   * @default false
   */
@@ -624,11 +619,6 @@ export interface FeatureToggles {
   */
   pluginProxyPreserveTrailingSlash?: boolean;
   /**
-  * Allows configuration of Azure Monitor as a data source that can provide Prometheus exemplars
-  * @default true
-  */
-  azureMonitorPrometheusExemplars?: boolean;
-  /**
   * Enables the gRPC server for authorization
   * @default false
   */
@@ -658,17 +648,6 @@ export interface FeatureToggles {
   * @default false
   */
   enableScopesInMetricsExplore?: boolean;
-  /**
-  * Round up end time for metric queries to the next minute to avoid missing data
-  * @default true
-  */
-  cloudWatchRoundUpEndTime?: boolean;
-  /**
-  * Deprecated. Allow override default AAD audience for Azure Prometheus endpoint. Enabled by default. This feature should no longer be used and will be removed in the future.
-  * @deprecated
-  * @default true
-  */
-  prometheusAzureOverrideAudience?: boolean;
   /**
   * Allows authenticated API calls in actions
   * @default false

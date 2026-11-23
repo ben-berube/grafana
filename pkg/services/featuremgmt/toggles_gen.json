@@ -1026,7 +1026,8 @@
       "metadata": {
         "name": "awsAsyncQueryCaching",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2023-07-21T15:34:07Z"
+        "creationTimestamp": "2023-07-21T15:34:07Z",
+        "deletionTimestamp": "2026-11-23T19:09:24Z"
       },
       "spec": {
         "description": "Enable caching for async queries for Redshift and Athena. Requires that the data source has caching and async query support enabled",
@@ -1104,7 +1105,8 @@
       "metadata": {
         "name": "azureMonitorPrometheusExemplars",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2024-06-06T16:53:17Z"
+        "creationTimestamp": "2024-06-06T16:53:17Z",
+        "deletionTimestamp": "2026-11-23T19:09:24Z"
       },
       "spec": {
         "description": "Allows configuration of Azure Monitor as a data source that can provide Prometheus exemplars",
@@ -1315,7 +1317,8 @@
       "metadata": {
         "name": "cloudWatchRoundUpEndTime",
         "resourceVersion": "1779440584464",
-        "creationTimestamp": "2024-06-27T15:10:28Z"
+        "creationTimestamp": "2024-06-27T15:10:28Z",
+        "deletionTimestamp": "2026-11-23T19:09:24Z"
       },
       "spec": {
         "description": "Round up end time for metric queries to the next minute to avoid missing data",

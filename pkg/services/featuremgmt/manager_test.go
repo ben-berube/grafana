@@ -66,3 +66,22 @@ func TestFeatureManager(t *testing.T) {
 		require.False(t, ft.IsEnabledGlobally("c"))
 	})
 }
+
+func TestRemovedFeatureTogglesStayRemoved(t *testing.T) {
+	// These toggles were GA or deprecated and enabled by default. Their enabled
+	// behavior is now unconditional, so the registry must not grow them back.
+	removed := []string{
+		"awsAsyncQueryCaching",
+		"azureMonitorPrometheusExemplars",
+		"cloudWatchRoundUpEndTime",
+		"prometheusAzureOverrideAudience",
+	}
+	registered := make(map[string]struct{}, len(standardFeatureFlags))
+	for _, flag := range standardFeatureFlags {
+		registered[flag.Name] = struct{}{}
+	}
+	for _, name := range removed {
+		_, ok := registered[name]
+		require.Falsef(t, ok, "feature toggle %s was removed", name)
+	}
+}

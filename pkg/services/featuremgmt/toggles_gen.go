@@ -99,10 +99,6 @@ const (
 	// Start an additional https handler and write kubectl options
 	FlagGrafanaAPIServerEnsureKubectlAccess = "grafanaAPIServerEnsureKubectlAccess"
 
-	// FlagAwsAsyncQueryCaching
-	// Enable caching for async queries for Redshift and Athena. Requires that the data source has caching and async query support enabled
-	FlagAwsAsyncQueryCaching = "awsAsyncQueryCaching"
-
 	// FlagConfigurableSchedulerTick
 	// Enable changing the scheduler base interval via configuration option unified_alerting.scheduler_tick_interval
 	FlagConfigurableSchedulerTick = "configurableSchedulerTick"
@@ -371,10 +367,6 @@ const (
 	// Preserve plugin proxy trailing slash.
 	FlagPluginProxyPreserveTrailingSlash = "pluginProxyPreserveTrailingSlash"
 
-	// FlagAzureMonitorPrometheusExemplars
-	// Allows configuration of Azure Monitor as a data source that can provide Prometheus exemplars
-	FlagAzureMonitorPrometheusExemplars = "azureMonitorPrometheusExemplars"
-
 	// FlagAuthZGRPCServer
 	// Enables the gRPC server for authorization
 	FlagAuthZGRPCServer = "authZGRPCServer"
@@ -398,14 +390,6 @@ const (
 	// FlagEnableScopesInMetricsExplore
 	// Enables the scopes usage in Metrics Explore
 	FlagEnableScopesInMetricsExplore = "enableScopesInMetricsExplore"
-
-	// FlagCloudWatchRoundUpEndTime
-	// Round up end time for metric queries to the next minute to avoid missing data
-	FlagCloudWatchRoundUpEndTime = "cloudWatchRoundUpEndTime"
-
-	// FlagPrometheusAzureOverrideAudience
-	// Deprecated. Allow override default AAD audience for Azure Prometheus endpoint. Enabled by default. This feature should no longer be used and will be removed in the future.
-	FlagPrometheusAzureOverrideAudience = "prometheusAzureOverrideAudience"
 
 	// FlagAppPlatformGrpcClientAuth
 	// Enables the gRPC client to authenticate with the App Platform by using ID & access tokens

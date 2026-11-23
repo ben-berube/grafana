@@ -290,14 +290,6 @@ var (
 			Generate:        Generate{LegacyGo: true, LegacyFrontend: true},
 		},
 		{
-			Name:        "awsAsyncQueryCaching",
-			Description: "Enable caching for async queries for Redshift and Athena. Requires that the data source has caching and async query support enabled",
-			Stage:       FeatureStageGeneralAvailability,
-			Expression:  "true", // enabled by default
-			Owner:       grafanaDataSourcesPlugins,
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
 			Name:            "configurableSchedulerTick",
 			Description:     "Enable changing the scheduler base interval via configuration option unified_alerting.scheduler_tick_interval",
 			Stage:           FeatureStageExperimental,
@@ -1196,14 +1188,6 @@ var (
 			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
 		},
 		{
-			Name:        "azureMonitorPrometheusExemplars",
-			Description: "Allows configuration of Azure Monitor as a data source that can provide Prometheus exemplars",
-			Stage:       FeatureStageGeneralAvailability,
-			Owner:       grafanaDataSourcesPlugins,
-			Expression:  "true", // enabled by default
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
 			Name:         "authZGRPCServer",
 			Description:  "Enables the gRPC server for authorization",
 			Stage:        FeatureStageExperimental,
@@ -1259,23 +1243,6 @@ var (
 			HideFromDocs:    true,
 			Expression:      "false",
 		},
-		{
-			Name:        "cloudWatchRoundUpEndTime",
-			Description: "Round up end time for metric queries to the next minute to avoid missing data",
-			Stage:       FeatureStageGeneralAvailability,
-			Owner:       grafanaDataSourcesPlugins,
-			Expression:  "true",
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-		{
-			Name:        "prometheusAzureOverrideAudience",
-			Description: "Deprecated. Allow override default AAD audience for Azure Prometheus endpoint. Enabled by default. This feature should no longer be used and will be removed in the future.",
-			Stage:       FeatureStageDeprecated,
-			Owner:       grafanaDataSourcesPlugins,
-			Expression:  "true", // Enabled by default for now
-			Generate:    Generate{LegacyGo: true, LegacyFrontend: true},
-		},
-
 		{
 			Name:         "vizActionsAuth",
 			Description:  "Allows authenticated API calls in actions",
