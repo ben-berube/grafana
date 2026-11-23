@@ -144,6 +144,10 @@ export default defineConfig<PluginOptions>({
       name: 'unauthenticated',
       testDir: path.join(testDirRoot, '/unauthenticated'),
     },
+    {
+      name: 'react-runtime',
+      testDir: path.join(testDirRoot, '/react-runtime'),
+    },
     withAuth({
       name: 'various',
       testDir: path.join(testDirRoot, '/various-suite'),
